@@ -254,4 +254,9 @@ public class DownloaderActivity extends AppCompatActivity implements   Response.
                 startActivity(new Intent(this, MainActivity.class));
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        Toast.makeText(this, "jeszcze moment i zaraz się ściagnie", Toast.LENGTH_SHORT).show();
+    }
 }

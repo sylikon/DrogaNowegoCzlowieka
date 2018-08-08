@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://D:\dowlonad\Android-Universal-Image-Loader-master\DrogaNowegoCzlowieka\DNCv2git.iml" filepath="D:\dowlonad\Android-Universal-Image-Loader-master\DrogaNowegoCzlowieka\DNCv2git.iml" />
       <module fileurl="file://$PROJECT_DIR$/DrogaNowegoCzlowieka.iml" filepath="$PROJECT_DIR$/DrogaNowegoCzlowieka.iml" />
-      <module fileurl="file://D:\_ANDROID_DNC\DNCv2git\DrogaNowegoCzlowieka.iml" filepath="D:\_ANDROID_DNC\DNCv2git\DrogaNowegoCzlowieka.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://D:\_ANDROID_DNC\DNCv2git\app\app.iml" filepath="D:\_ANDROID_DNC\DNCv2git\app\app.iml" />
     </modules>
   </component>
 </project>

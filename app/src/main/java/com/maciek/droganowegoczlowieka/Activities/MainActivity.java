@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(mIntent);
                 break;
             case R.id.button_oaza_youth:
-                verifyStoragePermissions(this);
                 mIntent.putExtra(TITLE, "oazowicz-wstep.mp3");
                 mIntent.putExtra("type_id", "2");
                 startActivity(mIntent);
@@ -130,10 +129,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onResponse(byte[] response) {
 
     }
-
-
-
-
 
 
     @Override

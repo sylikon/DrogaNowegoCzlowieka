@@ -219,12 +219,9 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         if(intent.getIntExtra(POSITION, -1)!=-1){
             index=intent.getIntExtra(POSITION,0);
             int temp = index;
-            viewPager.setCurrentItem(temp--);
-            try {
-                skipNext();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            viewPager.setCurrentItem(temp);
+            index++;
+            resumePlaying();
         }else if(trackProgress!=-1){
             int position = intent.getIntExtra(TRACK_PROGRESS,0);
             mMediaPlayer.seekTo(position);
@@ -372,15 +369,6 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         mMediaPlayer.setDataSource("file://"+mapAudio.get(index));
         mMediaPlayer.prepare();
         mMediaPlayer.start();
-//        String stringUrl = mapImage.get(index);
-//        if(mapImage.get(index).contains("null")){
-//            stringUrl="/storage/emulated/0/Pictures/turysta-dialog-malzenski.jpg";
-//        }
-//        URL url = new URL("file://"+stringUrl);
-//
-//        Bitmap bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-//        imageView.setImageBitmap(bitmap);
-
         mTextView.setText(index+". "+mapTitle.get(index));
 
         if(mapVideo.containsKey(index)){
@@ -389,6 +377,25 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
             mFloatingActionButton.setVisibility(View.GONE);
         }
 
+    }
+
+    private void resumePlaying(){
+        stopMedia();
+        mMediaPlayer.reset();
+        try {
+            mMediaPlayer.setDataSource("file://"+mapAudio.get(index));
+            mMediaPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mMediaPlayer.start();
+        mTextView.setText(index+". "+mapTitle.get(index));
+
+        if(mapVideo.containsKey(index)){
+            mFloatingActionButton.setVisibility(View.VISIBLE);
+        }else {
+            mFloatingActionButton.setVisibility(View.GONE);
+        }
     }
 
     private void skipPrevious() throws IOException {
@@ -402,15 +409,6 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         mMediaPlayer.setDataSource("file://"+mapAudio.get(index));
         mMediaPlayer.prepare();
         mMediaPlayer.start();
-//        String stringUrl = mapImage.get(index);
-//        if(mapImage.get(index).contains("null")){
-//            stringUrl="/storage/emulated/0/Pictures/turysta-dialog-malzenski.jpg";
-//        }
-//        URL url = new URL("file://"+stringUrl);
-//
-//        Bitmap bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-//        imageView.setImageBitmap(bitmap);
-
         mTextView.setText(index+". "+mapTitle.get(index));
 
         if(mapVideo.containsKey(index)){
