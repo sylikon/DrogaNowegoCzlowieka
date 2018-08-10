@@ -12,5 +12,6 @@
         Potrwa to w zależnosci od predkości Twojego internetu od kilku do kilkunastu minut. Zajmą one na Twoim telefonie około 120 Mb.  \nKliknij przycisk POBIERZ.
     </string>
     <string name="was_download_succesfull">randomStringThatWontAppear</string>
+    <string name="msg_token_fmt">123124</string>
     <!--TODO dodać wartości dla wszytkich referencji-->
 </resources>

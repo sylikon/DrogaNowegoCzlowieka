@@ -13,11 +13,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -25,6 +27,11 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.maciek.droganowegoczlowieka.DB.InsertPositionToList;
 import com.maciek.droganowegoczlowieka.DB.TouristListContract;
 import com.maciek.droganowegoczlowieka.DB.TuristListDbHelper;
@@ -74,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loader = findViewById(R.id.loader);
         SharedPreferences sharedPreferences = this.getSharedPreferences(
                 getString(R.string.was_download_succesfull), this.MODE_PRIVATE);
-
     }
 
 
@@ -142,8 +148,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             oazaYouthButton.setVisibility(View.VISIBLE);
             advancedButton.setVisibility(View.VISIBLE);
         }
-        if(isSuccesful!=4 || tableIsEmpty(db)){
-            reCreatedb();
+        if(tableIsEmpty(db)){
+//            reCreatedb();
             VolleyGetRequest volleyGetRequest = new VolleyGetRequest(this, db);
             loader.setVisibility(View.VISIBLE);
             volleyGetRequest.getNameAndPosition(1,loader, this);
@@ -203,6 +209,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " NUMBER);");
         finish();
     }
+
+
+
+
 
 
 }

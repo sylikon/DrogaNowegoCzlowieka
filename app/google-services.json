@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "121904928735",
+    "firebase_url": "https://droganowegoczlowieka.firebaseio.com",
+    "project_id": "droganowegoczlowieka",
+    "storage_bucket": "droganowegoczlowieka.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121904928735:android:22ba2a17584f3874",
+        "android_client_info": {
+          "package_name": "com.maciek.droganowegoczlowieka"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "121904928735-o8hb7f5lp2cru4ivsij2anhmoc06u9qq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEXWClXkyaGFEfDjj8pipq2efHqlnEQQs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -15,37 +15,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.View;
+
 import android.widget.ProgressBar;
-import android.widget.Toast;
+
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.maciek.droganowegoczlowieka.Adapter.TrackListAdapter;
-import com.maciek.droganowegoczlowieka.DB.InsertPositionToList;
-import com.maciek.droganowegoczlowieka.DB.TouristListContract;
 import com.maciek.droganowegoczlowieka.DB.TuristListDbHelper;
 import com.maciek.droganowegoczlowieka.DB.TuristListDbQuery;
 import com.maciek.droganowegoczlowieka.R;
-import com.maciek.droganowegoczlowieka.Utilities.DownloadService;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 
 import static com.maciek.droganowegoczlowieka.Activities.MediaPlayerActivity.POSITION;
 
 
 public class TrackListActivity extends AppCompatActivity implements  TrackListAdapter.ListItemClickListener,  Response.Listener<byte[]>, Response.ErrorListener{
-//implements Response.Listener<byte[]>, Response.ErrorListener, TrackListAdapter.ListItemClickListener
-
 
     private SQLiteDatabase db;
-    int count;
     HashMap<String,String> temp;
     private TrackListAdapter trackListAdapter;
     private RecyclerView mRecyclerView;
@@ -84,8 +73,6 @@ public class TrackListActivity extends AppCompatActivity implements  TrackListAd
         temp = new HashMap<>();
         cursor = turistListDbQuery.getAudioCursor(typeId);
         cursorMax=cursor.getCount()*3;
-        MainActivity.verifyStoragePermissions(this);
-        Toast.makeText(this, "Readable: " + isExternalStorageReadable() + " Writable: " + isExternalStorageWritable(), Toast.LENGTH_LONG).show();
         cursor.close();
         loader = findViewById(R.id.loader_track_list);
 

@@ -50,7 +50,6 @@ public class DownloaderActivity extends AppCompatActivity implements   Response.
         db = turistListDbHelper.getReadableDatabase();
         turistListDbQuery = new TuristListDbQuery(db);
         Cursor cursor = turistListDbQuery.getQueriedTouristList("1");
-        MainActivity.verifyStoragePermissions(this);
         textView = findViewById(R.id.downloader_textView);
         cursorMax = cursor.getCount()*3-3;
         progressBar = findViewById(R.id.progress_bar_downloader);
