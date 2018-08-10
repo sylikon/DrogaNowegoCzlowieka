@@ -35,14 +35,15 @@ public class VideoPlayerActivity extends AppCompatActivity implements View.OnCli
         position = intent.getIntExtra(POSITION,-1);
         trackProgress = intent.getIntExtra(TRACK_PROGRESS, -1);
         VideoView videoView = findViewById(R.id.video_view);
+        mFloatingButton=findViewById(R.id.launch_main_video_activity);
         if(uriToLunch==null){
             videoView.setVideoPath("android.resource://" + getPackageName() + "/" + R.raw.introdnc);
-            mFloatingButton=findViewById(R.id.launch_main_video_activity);
             mFloatingButton.setVisibility(View.VISIBLE);
             mFloatingButton.setOnClickListener(this);
 
         }else {
             videoView.setVideoURI(Uri.parse("file://"+uriToLunch));
+            mFloatingButton.setVisibility(View.GONE);
         }
         videoView.setMediaController(new MediaController(this));
         videoView.requestFocus();
