@@ -46,14 +46,14 @@ import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TITLE
 import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TYPE_ID;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, Response.Listener<byte[]>, Response.ErrorListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, Response.Listener<byte[]>, Response.ErrorListener {
 
     private Button touristButton, homeChurchButton, debuggerButton, oazaYouthButton, advancedButton;
     private ProgressBar progressBar;
     private SQLiteDatabase db;
     private int progressStatus = 0;
     private Handler mHandler = new Handler();
-    private  Cursor cursor;
+    private Cursor cursor;
     private ContentLoadingProgressBar loader;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         Intent mIntent = new Intent(this, MediaPlayerActivity.class);
-        mIntent.putExtra(TRACK_PROGRESS,0);
+        mIntent.putExtra(TRACK_PROGRESS, 0);
 
         switch (view.getId()) {
             case R.id.button_tourist:
@@ -124,8 +124,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
-
     @Override
     public void onErrorResponse(VolleyError error) {
 
@@ -139,20 +137,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onResume() {
-        SharedPreferences sharedPreferences = this.getSharedPreferences(getString(R.string.was_download_succesfull),Context.MODE_PRIVATE);
-        int isSuccesful=sharedPreferences.getInt(getString(R.string.was_download_succesfull), 0);
-        if(isSuccesful==4){
+        SharedPreferences sharedPreferences = this.getSharedPreferences(getString(R.string.was_download_succesfull), Context.MODE_PRIVATE);
+        int isSuccesful = sharedPreferences.getInt(getString(R.string.was_download_succesfull), 0);
+        if (isSuccesful == 4) {
             touristButton.setVisibility(View.VISIBLE);
             homeChurchButton.setVisibility(View.VISIBLE);
             debuggerButton.setVisibility(View.VISIBLE);
             oazaYouthButton.setVisibility(View.VISIBLE);
             advancedButton.setVisibility(View.VISIBLE);
-        }
-        if(tableIsEmpty(db)){
-//            reCreatedb();
+        } else {
+            reCreatedb();
             VolleyGetRequest volleyGetRequest = new VolleyGetRequest(this, db);
             loader.setVisibility(View.VISIBLE);
-            volleyGetRequest.getNameAndPosition(1,loader, this);
+            volleyGetRequest.getNameAndPosition(1, loader, this);
             volleyGetRequest.getNameAndPosition(2, loader, this);
             volleyGetRequest.getNameAndPosition(3, loader, this);
             volleyGetRequest.getNameAndPosition(4, loader, this);
@@ -160,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
 
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -180,24 +178,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private static boolean tableIsEmpty(SQLiteDatabase db){
-        String count = "SELECT count(*) FROM "+TouristListContract.TouristListEntry.TABLE_NAME;
+    private static boolean tableIsEmpty(SQLiteDatabase db) {
+        String count = "SELECT count(*) FROM " + TouristListContract.TouristListEntry.TABLE_NAME;
         Cursor mcursor = db.rawQuery(count, null);
         mcursor.moveToFirst();
         int icount = mcursor.getInt(0);
-        if(icount>0){
+        if (icount > 0) {
             return false;
-        }else {
+        } else {
             return true;
         }
 
     }
 
-    private  void reCreatedb(){
+    private void reCreatedb() {
         db.execSQL("DROP TABLE IF EXISTS " + TouristListContract.TouristListEntry.TABLE_NAME);
         db.execSQL("CREATE TABLE " + TouristListContract.TouristListEntry.TABLE_NAME + " (" +
                 TouristListContract.TouristListEntry._ID + " INTEGER PRIMARY KEY," +
-                TouristListContract.TouristListEntry.COLUMN_POSITION + " NUMBER,"+
+                TouristListContract.TouristListEntry.COLUMN_POSITION + " NUMBER," +
                 TouristListContract.TouristListEntry.COLUMN_AUDIO + " TEXT," +
                 TouristListContract.TouristListEntry.COLUMN_NAME + " TEXT," +
                 TouristListContract.TouristListEntry.COLUMN_AUDIO_URI + " TEXT," +
@@ -209,10 +207,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " NUMBER);");
         finish();
     }
-
-
-
-
 
 
 }

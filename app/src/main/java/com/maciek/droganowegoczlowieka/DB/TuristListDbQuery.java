@@ -3,6 +3,9 @@ package com.maciek.droganowegoczlowieka.DB;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Geezy on 15.07.2018.
  */
@@ -25,6 +28,25 @@ public class TuristListDbQuery {
                 null,
                 null);
     }
+
+    public void updatePosition(Map<Integer, String> map, String typeId) {
+        int type = Integer.valueOf(typeId);
+        for (Map.Entry<Integer, String> entry : map.entrySet()) {
+            String sql = String.format("update %1$s set %2$s = %3$s where %4$s = '%5$s' and %6$s = %7$s",
+                    TouristListContract.TouristListEntry.TABLE_NAME,            //1
+                    TouristListContract.TouristListEntry.COLUMN_POSITION,       //2
+                    entry.getKey(),                                             //3
+                    TouristListContract.TouristListEntry.COLUMN_NAME,           //4
+                    entry.getValue(),                                           //5
+                    TouristListContract.TouristListEntry.COLUMN_TYPE_ID,        //6
+                    type                                                        //7
+            );
+            mDb.execSQL(sql);
+        }
+
+    }
+
+
     public Cursor getAudioCursor(String type_id){
         String[] ary = new String[] {TouristListContract.TouristListEntry.COLUMN_AUDIO};
         String selection = TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " = ?";

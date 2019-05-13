@@ -121,7 +121,6 @@ public class DownloaderActivity extends AppCompatActivity implements   Response.
                 } else {
                     Toast.makeText(getApplicationContext(), "Download failed",
                             Toast.LENGTH_SHORT).show();
-
                 }
             }
         }

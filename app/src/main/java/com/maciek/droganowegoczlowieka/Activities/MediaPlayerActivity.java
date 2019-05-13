@@ -43,14 +43,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TITLE;
 import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TYPE_ID;
 
 public class MediaPlayerActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
-        MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener{
+        MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener {
 
     private SQLiteDatabase db;
     private TuristListDbQuery turistListDbQuery;
@@ -68,12 +70,11 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
     int index = -1;
     String title;
     private String typeId;
-    private Map<Integer, String>  mapAudio, mapVideo, mapImage, mapTitle;
+    private Map<Integer, String> mapAudio, mapVideo, mapImage, mapTitle;
 
     private MediaPlayer mMediaPlayer;
     public static String TRACK_PROGRESS = "TRACK_PROGRESS";
     int trackProgress;
-
 
 
     @Override
@@ -90,37 +91,49 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         db = turistListDbHelper.getReadableDatabase();
         turistListDbQuery = new TuristListDbQuery(db);
         cursor = turistListDbQuery.getAudioUriImageUriVideoUriPosByTypeId(typeId);
-        int audioUriIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_AUDIO_URI);
-        int videoUriIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_VIDEO_URI);
-        int imgUriIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_PICTURE_URI);
-        int posIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_POSITION);
+
         int audioNameIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_NAME);
+        int posIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_POSITION);
 
         mapAudio = new HashMap<>();
         mapImage = new HashMap<>();
         mapVideo = new HashMap<>();
-        mapTitle = new HashMap<>();
+        mapTitle = new LinkedHashMap<>();
         listOfImagesSorted = new ArrayList<>();
 
-        for(cursor.moveToFirst();!cursor.isAfterLast();cursor.moveToNext()){
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            if (cursor.getString(audioNameIndex) != null || !cursor.getString(audioNameIndex).equals("null")) {
+                mapTitle.put(cursor.getInt(posIndex), cursor.getString(audioNameIndex));
 
-            if(cursor.getString(audioUriIndex)!=null||!cursor.getString(audioUriIndex).equals("null"))
+            }
+        }
+        mapTitle = updateMap(mapTitle);
+        if (mapTitle.get(mapTitle.keySet().size()) == null) {
+            turistListDbQuery.updatePosition(mapTitle, typeId);
+        }
+
+        cursor = turistListDbQuery.getAudioUriImageUriVideoUriPosByTypeId(typeId);
+        int audioUriIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_AUDIO_URI);
+        int videoUriIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_VIDEO_URI);
+        int imgUriIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_PICTURE_URI);
+        posIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_POSITION);
+
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            if (cursor.getString(audioUriIndex) != null || !cursor.getString(audioUriIndex).equals("null")) {
                 mapAudio.put(cursor.getInt(posIndex), cursor.getString(audioUriIndex));
-            if(cursor.getString(videoUriIndex)!=null){
-                if(!cursor.getString(videoUriIndex).equals("null")){
+
+            }
+
+            if (cursor.getString(videoUriIndex) != null) {
+                if (!cursor.getString(videoUriIndex).equals("null")) {
                     mapVideo.put(cursor.getInt(posIndex), cursor.getString(videoUriIndex));
                 }
             }
-            if(cursor.getString(imgUriIndex)!=null||!cursor.getString(imgUriIndex).equals("null")){
+            if (cursor.getString(imgUriIndex) != null || !cursor.getString(imgUriIndex).equals("null")) {
                 mapImage.put(cursor.getInt(posIndex), cursor.getString(imgUriIndex));
                 listOfImagesSorted.add(cursor.getString(imgUriIndex));
             }
-
-            if(cursor.getString(audioNameIndex)!=null||!cursor.getString(audioNameIndex).equals("null"))
-                mapTitle.put(cursor.getInt(posIndex), cursor.getString(audioNameIndex));
-
         }
-
 
 
         //guziczki
@@ -142,7 +155,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         showList.setOnClickListener(this);
         // koniec Guziczków
 
-        viewPager.setAdapter(new SlidingImageAdapter(MediaPlayerActivity.this,listOfImagesSorted));
+        viewPager.setAdapter(new SlidingImageAdapter(MediaPlayerActivity.this, listOfImagesSorted));
         start.setBackgroundColor(getResources().getColor(R.color.ziolny_ciemny_michala));
 
         initMediaPlayer();
@@ -152,7 +165,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
             e.printStackTrace();
         }
 
-        mTextView.setText(index+". "+ mapTitle.get(index));
+        mTextView.setText(index + ". " + mapTitle.get(index));
         mMediaPlayer.setOnCompletionListener(this);
 
 
@@ -165,15 +178,15 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onPageSelected(int position) {
                 start.setImageResource(R.drawable.ic_pause_circle);
-                ispressed=false;
+                ispressed = false;
                 start.setBackgroundColor(getResources().getColor(R.color.ziolny_ciemny_michala));
-                if(position>index){
+                if (position > index) {
                     try {
                         skipNext();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }else {
+                } else {
                     try {
                         skipPrevious();
                     } catch (IOException e) {
@@ -189,7 +202,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
             }
         });
 
-        switch (typeId){
+        switch (typeId) {
             case "1":
                 trackTitleTextView.setText("Turysta");
                 break;
@@ -207,23 +220,41 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
 
     }
 
-    private boolean initMediaPlayer(){
+    private boolean initMediaPlayer() {
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.reset();
         return true;
     }
 
+    static Map<Integer, String> updateMap(Map<Integer, String> map) {
+
+        Integer a = map.size();
+        Map<Integer, String> orderedMap = new LinkedHashMap<>();
+        for (int i = 0; i < a; i++) {
+            if (map.keySet().iterator().hasNext()) {
+                if (map.get(map.keySet().iterator().next()) == null) {
+                    map.remove(map.keySet().iterator().next());
+                    a--;
+                }
+                orderedMap.put(i, map.get(map.keySet().iterator().next()));
+                map.remove(map.keySet().iterator().next());
+            }
+        }
+
+        return orderedMap;
+    }
+
     @Override
     protected void onResume() {
         Intent intent = getIntent();
-        if(intent.getIntExtra(POSITION, -1)!=-1){
-            index=intent.getIntExtra(POSITION,0);
+        if (intent.getIntExtra(POSITION, -1) != -1) {
+            index = intent.getIntExtra(POSITION, 0);
             int temp = index;
             viewPager.setCurrentItem(temp);
             index++;
             resumePlaying();
-        }else if(trackProgress!=-1){
-            int position = intent.getIntExtra(TRACK_PROGRESS,0);
+        } else if (trackProgress != -1) {
+            int position = intent.getIntExtra(TRACK_PROGRESS, 0);
             mMediaPlayer.seekTo(position);
             mMediaPlayer.start();
         }
@@ -231,6 +262,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         super.onResume();
 
     }
+
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -257,13 +289,15 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-       return false;
+        return false;
     }
+
     int temp;
     boolean ispressed = false;
+
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.next_button:
                 try {
                     index++;
@@ -277,25 +311,24 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
                 ispressed = false;
                 start.setImageResource(R.drawable.ic_pause_circle);
                 start.setBackgroundColor(getResources().getColor(R.color.ziolny_ciemny_michala));
-                
+
                 break;
             case R.id.start_stop_button:
-              
-
-                    if(ispressed){
-                        ispressed= false;
-                        playMedia();
-                        start.setImageResource(R.drawable.ic_pause_circle);
-                        start.setBackgroundColor(getResources().getColor(R.color.ziolny_ciemny_michala));
-
-                    }else {
-                        ispressed=true;
-                        pauseMedia();
-                        start.setImageResource(R.drawable.ic_play_white);
-                        start.setBackgroundColor(getResources().getColor(R.color.zielony_michala));
 
 
-                    
+                if (ispressed) {
+                    ispressed = false;
+                    playMedia();
+                    start.setImageResource(R.drawable.ic_pause_circle);
+                    start.setBackgroundColor(getResources().getColor(R.color.ziolny_ciemny_michala));
+
+                } else {
+                    ispressed = true;
+                    pauseMedia();
+                    start.setImageResource(R.drawable.ic_play_white);
+                    start.setBackgroundColor(getResources().getColor(R.color.zielony_michala));
+
+
                 }
                 break;
             case R.id.button_previous:
@@ -306,7 +339,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
 
                         @Override
                         public void run() {
-                            viewPager.setCurrentItem(temp-2);
+                            viewPager.setCurrentItem(temp - 2);
 
                         }
                     }, 50);
@@ -352,68 +385,68 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onCompletion(MediaPlayer mMediaPlayer) {
         mMediaPlayer.seekTo(0);
-        ispressed=true;
+        ispressed = true;
         start.setImageResource(R.drawable.ic_play_white);
         start.setBackgroundColor(getResources().getColor(R.color.zielony_michala));
 
     }
 
     private void skipNext() throws IOException {
-        if(index==mapAudio.size()-1){
-            index=mapAudio.size()-1;
-        }else {
+        if (index == mapAudio.size() - 1) {
+            index = mapAudio.size() - 1;
+        } else {
             index++;
         }
         stopMedia();
         mMediaPlayer.reset();
-        mMediaPlayer.setDataSource("file://"+mapAudio.get(index));
+        mMediaPlayer.setDataSource("file://" + mapAudio.get(index));
         mMediaPlayer.prepare();
         mMediaPlayer.start();
-        mTextView.setText(index+". "+mapTitle.get(index));
+        mTextView.setText(index + ". " + mapTitle.get(index));
 
-        if(mapVideo.containsKey(index)){
+        if (mapVideo.containsKey(index)) {
             mFloatingActionButton.setVisibility(View.VISIBLE);
-        }else {
+        } else {
             mFloatingActionButton.setVisibility(View.GONE);
         }
 
     }
 
-    private void resumePlaying(){
+    private void resumePlaying() {
         stopMedia();
         mMediaPlayer.reset();
         try {
-            mMediaPlayer.setDataSource("file://"+mapAudio.get(index));
+            mMediaPlayer.setDataSource("file://" + mapAudio.get(index));
             mMediaPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();
         }
         mMediaPlayer.start();
-        mTextView.setText(index+". "+mapTitle.get(index));
+        mTextView.setText(index + ". " + mapTitle.get(index));
 
-        if(mapVideo.containsKey(index)){
+        if (mapVideo.containsKey(index)) {
             mFloatingActionButton.setVisibility(View.VISIBLE);
-        }else {
+        } else {
             mFloatingActionButton.setVisibility(View.GONE);
         }
     }
 
     private void skipPrevious() throws IOException {
-        if(index==0){
+        if (index == 0) {
             index = 0;
-        }else {
+        } else {
             index--;
         }
         stopMedia();
         mMediaPlayer.reset();
-        mMediaPlayer.setDataSource("file://"+mapAudio.get(index));
+        mMediaPlayer.setDataSource("file://" + mapAudio.get(index));
         mMediaPlayer.prepare();
         mMediaPlayer.start();
-        mTextView.setText(index+". "+mapTitle.get(index));
+        mTextView.setText(index + ". " + mapTitle.get(index));
 
-        if(mapVideo.containsKey(index)){
+        if (mapVideo.containsKey(index)) {
             mFloatingActionButton.setVisibility(View.VISIBLE);
-        }else {
+        } else {
             mFloatingActionButton.setVisibility(View.GONE);
         }
     }
@@ -463,7 +496,9 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
             mMediaPlayer.stop();
         }
     }
+
     int resumePosition;
+
     public void pauseMedia() {
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
