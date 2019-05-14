@@ -1,14 +1,8 @@
-package com.maciek.droganowegoczlowieka.Activities;
+package com.maciek.v2.Activities;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Environment;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
@@ -21,15 +15,15 @@ import android.widget.ProgressBar;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.maciek.droganowegoczlowieka.Adapter.TrackListAdapter;
-import com.maciek.droganowegoczlowieka.DB.TuristListDbHelper;
-import com.maciek.droganowegoczlowieka.DB.TuristListDbQuery;
-import com.maciek.droganowegoczlowieka.R;
+import com.maciek.v2.Adapter.TrackListAdapter;
+import com.maciek.v2.DB.TuristListDbHelper;
+import com.maciek.v2.DB.TuristListDbQuery;
+import com.maciek.v2.R;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-import static com.maciek.droganowegoczlowieka.Activities.MediaPlayerActivity.POSITION;
+import static com.maciek.v2.Activities.MediaPlayerActivity.POSITION;
 
 
 public class TrackListActivity extends AppCompatActivity implements  TrackListAdapter.ListItemClickListener,  Response.Listener<byte[]>, Response.ErrorListener{

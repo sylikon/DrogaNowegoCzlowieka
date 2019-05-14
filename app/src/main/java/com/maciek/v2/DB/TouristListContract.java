@@ -1,4 +1,4 @@
-package com.maciek.droganowegoczlowieka.DB;
+package com.maciek.v2.DB;
 
 import android.provider.BaseColumns;
 

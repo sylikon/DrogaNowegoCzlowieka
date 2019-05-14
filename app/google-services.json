@@ -1,16 +1,16 @@
 {
   "project_info": {
     "project_number": "121904928735",
-    "firebase_url": "https://droganowegoczlowieka.firebaseio.com",
-    "project_id": "droganowegoczlowieka",
-    "storage_bucket": "droganowegoczlowieka.appspot.com"
+    "firebase_url": "https://v2.firebaseio.com",
+    "project_id": "v2",
+    "storage_bucket": "v2.appspot.com"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:121904928735:android:22ba2a17584f3874",
         "android_client_info": {
-          "package_name": "com.maciek.droganowegoczlowieka"
+          "package_name": "com.maciek.v2"
         }
       },
       "oauth_client": [

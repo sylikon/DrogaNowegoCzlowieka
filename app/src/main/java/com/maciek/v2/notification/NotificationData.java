@@ -1,4 +1,4 @@
-package com.maciek.droganowegoczlowieka.notification;
+package com.maciek.v2.notification;
 
 /**
  * Created by Geezy on 10.08.2018.

@@ -1,4 +1,4 @@
-package com.maciek.droganowegoczlowieka;
+package com.maciek.v2;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

@@ -1,4 +1,4 @@
-package com.maciek.droganowegoczlowieka.Utilities;
+package com.maciek.v2.Utilities;
 
 import android.content.Context;
 import android.view.GestureDetector;

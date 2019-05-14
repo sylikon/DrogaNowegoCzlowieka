@@ -1,21 +1,9 @@
-package com.maciek.droganowegoczlowieka.Activities;
+package com.maciek.v2.Activities;
 
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.media.MediaPlayer;
-import android.os.Handler;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -26,29 +14,22 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.maciek.droganowegoczlowieka.Adapter.SlidingImageAdapter;
-import com.maciek.droganowegoczlowieka.DB.TouristListContract;
-import com.maciek.droganowegoczlowieka.DB.TuristListDbHelper;
-import com.maciek.droganowegoczlowieka.DB.TuristListDbQuery;
-import com.maciek.droganowegoczlowieka.MediaPlayer.StorageUtil;
-import com.maciek.droganowegoczlowieka.R;
-import com.maciek.droganowegoczlowieka.Utilities.OnSwipeTouchListener;
+import com.maciek.v2.Adapter.SlidingImageAdapter;
+import com.maciek.v2.DB.TouristListContract;
+import com.maciek.v2.DB.TuristListDbHelper;
+import com.maciek.v2.DB.TuristListDbQuery;
+import com.maciek.v2.R;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
-import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TITLE;
-import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TYPE_ID;
+import static com.maciek.v2.Activities.TrackListActivity.TITLE;
+import static com.maciek.v2.Activities.TrackListActivity.TYPE_ID;
 
 public class MediaPlayerActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
@@ -159,11 +140,15 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         start.setBackgroundColor(getResources().getColor(R.color.ziolny_ciemny_michala));
 
         initMediaPlayer();
-        try {
-            skipNext();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        if (intent.getIntExtra(POSITION, -1) == -1) {
+            try {
+                skipNext();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
 
         mTextView.setText(index + ". " + mapTitle.get(index));
         mMediaPlayer.setOnCompletionListener(this);
@@ -248,11 +233,15 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
     protected void onResume() {
         Intent intent = getIntent();
         if (intent.getIntExtra(POSITION, -1) != -1) {
-            index = intent.getIntExtra(POSITION, 0);
+            index = intent.getIntExtra(POSITION, -1);
             int temp = index;
-            viewPager.setCurrentItem(temp);
-            index++;
+            ++index;
+            if (temp == 0) {
+                index--;
+            }
             resumePlaying();
+            viewPager.setCurrentItem(temp);
+
         } else if (trackProgress != -1) {
             int position = intent.getIntExtra(TRACK_PROGRESS, 0);
             mMediaPlayer.seekTo(position);

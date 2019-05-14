@@ -1,4 +1,4 @@
-package com.maciek.droganowegoczlowieka.Adapter;
+package com.maciek.v2.Adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,9 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.maciek.droganowegoczlowieka.R;
+import com.maciek.v2.R;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 

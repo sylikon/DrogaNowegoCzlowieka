@@ -1,4 +1,4 @@
-package com.maciek.droganowegoczlowieka.notification;
+package com.maciek.v2.notification;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,8 +9,8 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.maciek.droganowegoczlowieka.Activities.MainActivity;
-import com.maciek.droganowegoczlowieka.R;
+import com.maciek.v2.Activities.MainActivity;
+import com.maciek.v2.R;
 
 import java.net.URLDecoder;
 

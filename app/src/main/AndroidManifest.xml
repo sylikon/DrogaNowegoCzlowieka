@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.maciek.droganowegoczlowieka">
+    package="com.maciek.v2">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
-            android:name=".Activities.VideoPlayerActivity"
+            android:name="com.maciek.v2.Activities.VideoPlayerActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,24 +24,22 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activities.TrackListActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".Utilities.AndroidDatabaseManager"
+            android:name="com.maciek.v2.Activities.TrackListActivity"
             android:screenOrientation="portrait" />
 
-        <service android:name=".Utilities.DownloadService" />
+        <service android:name="com.maciek.v2.Utilities.DownloadService" />
 
         <activity
-            android:name=".Activities.MediaPlayerActivity"
+            android:name="com.maciek.v2.Activities.MediaPlayerActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activities.MainActivity"
+            android:name="com.maciek.v2.Activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activities.DownloaderActivity"
+            android:name="com.maciek.v2.Activities.DownloaderActivity"
             android:screenOrientation="portrait" />
-        <service android:name=".notification.MyFirebaseMessagingService">
+
+        <service android:name="com.maciek.v2.notification.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>

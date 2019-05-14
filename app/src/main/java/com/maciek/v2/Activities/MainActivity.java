@@ -1,54 +1,41 @@
-package com.maciek.droganowegoczlowieka.Activities;
+package com.maciek.v2.Activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.media.MediaPlayer;
 import android.os.Handler;
-import android.os.SystemClock;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.maciek.droganowegoczlowieka.DB.InsertPositionToList;
-import com.maciek.droganowegoczlowieka.DB.TouristListContract;
-import com.maciek.droganowegoczlowieka.DB.TuristListDbHelper;
-import com.maciek.droganowegoczlowieka.DB.TuristListDbQuery;
-import com.maciek.droganowegoczlowieka.R;
-import com.maciek.droganowegoczlowieka.Utilities.AndroidDatabaseManager;
-import com.maciek.droganowegoczlowieka.Utilities.DownloadService;
-import com.maciek.droganowegoczlowieka.Utilities.VolleyGetRequest;
+import com.maciek.v2.DB.TouristListContract;
+import com.maciek.v2.DB.TuristListDbHelper;
+import com.maciek.v2.DB.TuristListDbQuery;
+import com.maciek.v2.R;
+import com.maciek.v2.Utilities.VolleyGetRequest;
 
-import static com.maciek.droganowegoczlowieka.Activities.MediaPlayerActivity.TRACK_PROGRESS;
-import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TITLE;
-import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TYPE_ID;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.maciek.v2.Activities.MediaPlayerActivity.TRACK_PROGRESS;
+import static com.maciek.v2.Activities.TrackListActivity.TITLE;
+import static com.maciek.v2.Activities.TrackListActivity.TYPE_ID;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, Response.Listener<byte[]>, Response.ErrorListener {
 
-    private Button touristButton, homeChurchButton, debuggerButton, oazaYouthButton, advancedButton;
+    private Button touristButton, homeChurchButton, oazaYouthButton, advancedButton;
     private ProgressBar progressBar;
     private SQLiteDatabase db;
     private int progressStatus = 0;
@@ -70,12 +57,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         db = turistListDbHelper.getWritableDatabase();
         touristButton = findViewById(R.id.button_tourist);
         homeChurchButton = findViewById(R.id.button_home_church);
-        debuggerButton = findViewById(R.id.button_db_debugger);
         oazaYouthButton = findViewById(R.id.button_oaza_youth);
         advancedButton = findViewById(R.id.button_advanced);
         advancedButton.setOnClickListener(this);
         oazaYouthButton.setOnClickListener(this);
-        debuggerButton.setOnClickListener(this);
         touristButton.setOnClickListener(this);
         homeChurchButton.setOnClickListener(this);
         loader = findViewById(R.id.loader);
@@ -104,9 +89,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mIntent.putExtra(TITLE, "domowy-kosciol-wstep.mp3");
                 mIntent.putExtra("type_id", "3");
                 startActivity(mIntent);
-                break;
-            case R.id.button_db_debugger:
-                startActivity(new Intent(this, AndroidDatabaseManager.class));
                 break;
             case R.id.button_advanced:
                 mIntent.putExtra(TITLE, "moderator-wstep.mp3");
@@ -138,16 +120,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         SharedPreferences sharedPreferences = this.getSharedPreferences(getString(R.string.was_download_succesfull), Context.MODE_PRIVATE);
+        VolleyGetRequest volleyGetRequest = new VolleyGetRequest(this, db);
+        loader.setVisibility(View.VISIBLE);
+        TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
+        List<String> list = turistListDbQuery.getActiveAudio();
+        volleyGetRequest.getActiveAudioFromServerTable(list, loader, this);
+        loader.setVisibility(View.GONE);
         int isSuccesful = sharedPreferences.getInt(getString(R.string.was_download_succesfull), 0);
         if (isSuccesful == 4) {
             touristButton.setVisibility(View.VISIBLE);
             homeChurchButton.setVisibility(View.VISIBLE);
-            debuggerButton.setVisibility(View.VISIBLE);
             oazaYouthButton.setVisibility(View.VISIBLE);
             advancedButton.setVisibility(View.VISIBLE);
         } else {
             reCreatedb();
-            VolleyGetRequest volleyGetRequest = new VolleyGetRequest(this, db);
             loader.setVisibility(View.VISIBLE);
             volleyGetRequest.getNameAndPosition(1, loader, this);
             volleyGetRequest.getNameAndPosition(2, loader, this);

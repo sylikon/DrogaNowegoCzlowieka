@@ -1,4 +1,4 @@
-package com.maciek.droganowegoczlowieka;
+package com.maciek.v2;
 
 import org.junit.Test;
 

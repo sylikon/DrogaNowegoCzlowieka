@@ -1,17 +1,15 @@
-package com.maciek.droganowegoczlowieka.Activities;
+package com.maciek.v2.Activities;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -19,15 +17,12 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.maciek.droganowegoczlowieka.DB.InsertPositionToList;
-import com.maciek.droganowegoczlowieka.DB.TouristListContract;
-import com.maciek.droganowegoczlowieka.DB.TuristListDbHelper;
-import com.maciek.droganowegoczlowieka.DB.TuristListDbQuery;
-import com.maciek.droganowegoczlowieka.R;
-import com.maciek.droganowegoczlowieka.Utilities.DownloadService;
-
-import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TITLE;
-import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TYPE_ID;
+import com.maciek.v2.DB.InsertPositionToList;
+import com.maciek.v2.DB.TouristListContract;
+import com.maciek.v2.DB.TuristListDbHelper;
+import com.maciek.v2.DB.TuristListDbQuery;
+import com.maciek.v2.R;
+import com.maciek.v2.Utilities.DownloadService;
 
 public class DownloaderActivity extends AppCompatActivity implements   Response.Listener<byte[]>, Response.ErrorListener, View.OnClickListener{
 

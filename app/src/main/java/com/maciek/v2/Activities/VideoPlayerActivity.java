@@ -1,4 +1,4 @@
-package com.maciek.droganowegoczlowieka.Activities;
+package com.maciek.v2.Activities;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -12,12 +12,12 @@ import android.view.WindowManager;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
-import com.maciek.droganowegoczlowieka.R;
+import com.maciek.v2.R;
 
-import static com.maciek.droganowegoczlowieka.Activities.MediaPlayerActivity.POSITION;
-import static com.maciek.droganowegoczlowieka.Activities.MediaPlayerActivity.TRACK_PROGRESS;
-import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TITLE;
-import static com.maciek.droganowegoczlowieka.Activities.TrackListActivity.TYPE_ID;
+import static com.maciek.v2.Activities.MediaPlayerActivity.POSITION;
+import static com.maciek.v2.Activities.MediaPlayerActivity.TRACK_PROGRESS;
+import static com.maciek.v2.Activities.TrackListActivity.TITLE;
+import static com.maciek.v2.Activities.TrackListActivity.TYPE_ID;
 
 public class VideoPlayerActivity extends AppCompatActivity implements View.OnClickListener {
 
