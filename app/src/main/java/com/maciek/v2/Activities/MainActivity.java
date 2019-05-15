@@ -121,11 +121,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         SharedPreferences sharedPreferences = this.getSharedPreferences(getString(R.string.was_download_succesfull), Context.MODE_PRIVATE);
         VolleyGetRequest volleyGetRequest = new VolleyGetRequest(this, db);
-        loader.setVisibility(View.VISIBLE);
-        TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
-        List<String> list = turistListDbQuery.getActiveAudio();
-        volleyGetRequest.getActiveAudioFromServerTable(list, loader, this);
-        loader.setVisibility(View.GONE);
         int isSuccesful = sharedPreferences.getInt(getString(R.string.was_download_succesfull), 0);
         if (isSuccesful == 4) {
             touristButton.setVisibility(View.VISIBLE);
@@ -140,6 +135,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             volleyGetRequest.getNameAndPosition(3, loader, this);
             volleyGetRequest.getNameAndPosition(4, loader, this);
         }
+        loader.setVisibility(View.VISIBLE);
+        TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
+        List<String> list = turistListDbQuery.getActiveAudio();
+        volleyGetRequest.getActiveAudioFromServerTable(list, loader, this);
+        loader.setVisibility(View.GONE);
         super.onResume();
 
     }

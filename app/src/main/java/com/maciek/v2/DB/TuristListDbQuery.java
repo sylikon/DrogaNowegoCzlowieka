@@ -24,8 +24,8 @@ public class TuristListDbQuery {
 
     public Cursor getQueriedTouristList(String type_id) {
         String[] ary = new String[]{TouristListContract.TouristListEntry.COLUMN_POSITION, TouristListContract.TouristListEntry.COLUMN_NAME, TouristListContract.TouristListEntry.COLUMN_AUDIO_URI, TouristListContract.TouristListEntry.COLUMN_AUDIO};
-        String selection = TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " = ?";
-        String[] selectionArgs = {type_id};
+        String selection = TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " = ? and " + TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE + " = ?";
+        String[] selectionArgs = {type_id, "1"};
         return mDb.query(TouristListContract.TouristListEntry.TABLE_NAME,
                 ary,
                 selection,
@@ -80,6 +80,19 @@ public class TuristListDbQuery {
                 TouristListContract.TouristListEntry.TABLE_NAME,            //1
                 TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE,      //2
                 0,                                                          //3
+                TouristListContract.TouristListEntry.COLUMN_AUDIO,          //4
+                audioJoined                                                 //5
+
+        );
+        mDb.execSQL(sql);
+    }
+
+    public void enableAudio(List<String> audioList) {
+        String audioJoined = VolleyGetRequest.prepareInClause(audioList);
+        String sql = String.format("update %1$s set %2$s = %3$s where %4$s in (%5$s)",
+                TouristListContract.TouristListEntry.TABLE_NAME,            //1
+                TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE,      //2
+                1,                                                          //3
                 TouristListContract.TouristListEntry.COLUMN_AUDIO,          //4
                 audioJoined                                                 //5
 
@@ -239,8 +252,8 @@ public class TuristListDbQuery {
                         TouristListContract.TouristListEntry.COLUMN_VIDEO_URI,
                         TouristListContract.TouristListEntry.COLUMN_POSITION,
                         TouristListContract.TouristListEntry.COLUMN_NAME};
-        String selection = TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " = ?";
-        String[] selectionArgs = {typeId};
+        String selection = TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " = ? and " + TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE + " = ? ";
+        String[] selectionArgs = {typeId, "1"};
         return mDb.query(TouristListContract.TouristListEntry.TABLE_NAME,
                 ary,
                 selection,

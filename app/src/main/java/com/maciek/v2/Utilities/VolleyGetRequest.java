@@ -162,10 +162,15 @@ public class VolleyGetRequest {
                             }
                             audioList.removeAll(currentAudioList);
                             if (!audioList.isEmpty()) {
+                                turistListDbHelper.enableAudio(audioList);
+
                                 for (int i = 1; i <= 4; i++) {
                                     updatePosition(i, turistListDbHelper);
                                 }
-                                getNameAndPositionByAudio(audioList, loader, context);
+                                audioList.removeAll(turistListDbHelper.getActiveAudio());
+                                if (!audioList.isEmpty()) {
+                                    getNameAndPositionByAudio(audioList, loader, context);
+                                }
                             }
 
                         } catch (JSONException e) {
@@ -185,6 +190,7 @@ public class VolleyGetRequest {
     private void getNameAndPositionByAudio(List<String> audioName, final ContentLoadingProgressBar loader, final Context mContext) {
         isDone = false;
         final String audiosToDownload = prepareInClause(audioName);
+        final String audiosToDownloadUri = audiosToDownload.replaceAll("'", "%27");
         String url = "http://android.x25.pl/NowaDroga/GET/getTitleAndPictureByAudio.php?audioName=" + audiosToDownload;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -210,7 +216,7 @@ public class VolleyGetRequest {
                                 InsertPositionToList.insertAudiJpgDataByPos(db, audio, typeId, position, name, jpgname, isActive);
 
                             }
-                            getVideoAndAudioByAudio(audiosToDownload, loader, mContext);
+                            getVideoAndAudioByAudio(audiosToDownloadUri, loader, mContext);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -226,13 +232,14 @@ public class VolleyGetRequest {
     }
 
     public static String prepareInClause(List<String> list) {
-        String joined = "%27" + list.get(0) + "%27";
+        String joined = "'" + list.get(0) + "'";
         list.remove(0);
         for (String s : list) {
-            joined = joined + ",'" + s + "%27";
+            joined = joined + ",'" + s + "'";
         }
         return joined;
     }
+
 
     private void getVideoAndAudioByAudio(String audio, final ContentLoadingProgressBar loader, final Context mContext) {
         String url = "http://android.x25.pl/NowaDroga/GET/getVideoByAudio.php?audioName=" + audio;
