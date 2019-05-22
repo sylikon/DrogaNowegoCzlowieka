@@ -11,6 +11,11 @@
         Witaj! \n\nZanim będziesz mógł korzystać z aplikacju pobierz materiały multimedialne do wszystkich ścieżek.
         Potrwa to w zależnosci od predkości Twojego internetu od kilku do kilkunastu minut. Zajmą one na Twoim telefonie około 120 Mb.  \nKliknij przycisk POBIERZ.
     </string>
+    <string name="update_text">
+        Dostępna jest aktualizacja ścieżek! Jeżeli chcesz cieszyć się nowymi punktami, kliknij aktualizuj :)
+        Jeżeli chcesz wrócić do aplikacji kliknij powrót.
+    </string>
+    <string name="hello_text">Hejo!</string>
     <string name="was_download_succesfull">randomStringThatWontAppear</string>
     <string name="msg_token_fmt">123124</string>
     <string name="default_notification_channel_id">defaultNotificationChannelId</string>

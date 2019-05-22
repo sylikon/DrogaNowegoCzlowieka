@@ -4,7 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -20,6 +24,7 @@ import com.maciek.v2.Activities.DownloaderActivity;
 import com.maciek.v2.DB.InsertPositionToList;
 import com.maciek.v2.DB.TuristListDbHelper;
 import com.maciek.v2.DB.TuristListDbQuery;
+import com.maciek.v2.R;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -35,11 +40,13 @@ import java.util.List;
 
 public class VolleyGetRequest {
 
+    private ViewGroup container;
     private Context context;
-    SQLiteDatabase db;
-    RequestQueue mRequestQueue;
+    private SQLiteDatabase db;
+    private RequestQueue mRequestQueue;
     private TuristListDbQuery turistListDbHelper;
-    boolean isDone;
+    private boolean isDone;
+    private RelativeLayout relativeLayout;
 
     public VolleyGetRequest(Context context, SQLiteDatabase db) {
         this.context = context;
@@ -137,7 +144,7 @@ public class VolleyGetRequest {
     }
 
 
-    public void getActiveAudioFromServerTable(final List<String> currentAudioList, final ContentLoadingProgressBar loader, final Context mContext) {
+    public void getActiveAudioFromServerTable(final List<String> currentAudioList, final View view, final Context mContext) {
         String url = "http://android.x25.pl/NowaDroga/GET/getActiveAudio.php";
         turistListDbHelper = new TuristListDbQuery(db);
         Cache cache = new DiskBasedCache(context.getCacheDir(), 1024 * 1024);
@@ -149,6 +156,7 @@ public class VolleyGetRequest {
                     @Override
                     public void onResponse(String response) {
                         try {
+                            addView(view, mContext);
                             JSONObject jsonObject = new JSONObject(response);
                             JSONArray jsonArray = (JSONArray) jsonObject.get("punkty");
                             List<String> audioList = new ArrayList<>();
@@ -169,7 +177,9 @@ public class VolleyGetRequest {
                                 }
                                 audioList.removeAll(turistListDbHelper.getActiveAudio());
                                 if (!audioList.isEmpty()) {
-                                    getNameAndPositionByAudio(audioList, loader, context);
+                                    //TODO add view
+
+                                    getNameAndPositionByAudio(audioList, context);
                                 }
                             }
 
@@ -187,7 +197,7 @@ public class VolleyGetRequest {
         mRequestQueue.add(stringRequest);
     }
 
-    private void getNameAndPositionByAudio(List<String> audioName, final ContentLoadingProgressBar loader, final Context mContext) {
+    private void getNameAndPositionByAudio(List<String> audioName, final Context mContext) {
         isDone = false;
         final String audiosToDownload = prepareInClause(audioName);
         final String audiosToDownloadUri = audiosToDownload.replaceAll("'", "%27");
@@ -216,7 +226,7 @@ public class VolleyGetRequest {
                                 InsertPositionToList.insertAudiJpgDataByPos(db, audio, typeId, position, name, jpgname, isActive);
 
                             }
-                            getVideoAndAudioByAudio(audiosToDownloadUri, loader, mContext);
+                            getVideoAndAudioByAudio(audiosToDownloadUri, mContext);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -241,7 +251,7 @@ public class VolleyGetRequest {
     }
 
 
-    private void getVideoAndAudioByAudio(String audio, final ContentLoadingProgressBar loader, final Context mContext) {
+    private void getVideoAndAudioByAudio(String audio, final Context mContext) {
         String url = "http://android.x25.pl/NowaDroga/GET/getVideoByAudio.php?audioName=" + audio;
         isDone = false;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -308,6 +318,30 @@ public class VolleyGetRequest {
             }
         });
         mRequestQueue.add(stringRequest);
+    }
+
+
+    public void addView(final View mainView, Context context) {
+        LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        assert vi != null;
+
+        final View v = vi.inflate(R.layout.update_layout, null);
+        container = mainView.findViewById(R.id.main_activity_layout);
+        container.removeAllViews();
+        container.addView(v, 0, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        Button rejectUpdate = v.findViewById(R.id.reject_update_button);
+        rejectUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                removeView(mainView, v);
+            }
+        });
+
+    }
+
+    public void removeView(View view, View v) {
+        view.setVisibility(View.VISIBLE);
     }
 
 

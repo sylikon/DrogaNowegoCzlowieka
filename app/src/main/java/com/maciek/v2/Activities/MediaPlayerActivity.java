@@ -88,7 +88,8 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
 
             }
         }
-        mapTitle = updateMap(mapTitle);
+        mapTitle = updateMap(mapTitle, turistListDbQuery);
+
         if (mapTitle.get(mapTitle.keySet().size()) == null) {
             turistListDbQuery.updatePosition(mapTitle, typeId);
         }
@@ -211,7 +212,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         return true;
     }
 
-    static Map<Integer, String> updateMap(Map<Integer, String> map) {
+    static Map<Integer, String> updateMap(Map<Integer, String> map, TuristListDbQuery dbQuery) {
 
         Integer a = map.size();
         Map<Integer, String> orderedMap = new LinkedHashMap<>();
@@ -222,6 +223,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
                     a--;
                 }
                 orderedMap.put(i, map.get(map.keySet().iterator().next()));
+                dbQuery.updatePosition(i, orderedMap.get(i));
                 map.remove(map.keySet().iterator().next());
             }
         }

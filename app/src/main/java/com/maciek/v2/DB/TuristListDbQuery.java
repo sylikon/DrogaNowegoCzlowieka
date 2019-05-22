@@ -32,7 +32,7 @@ public class TuristListDbQuery {
                 selectionArgs,
                 null,
                 null,
-                null);
+                TouristListContract.TouristListEntry.COLUMN_POSITION);
     }
 
     public List<String> getActiveAudio() {

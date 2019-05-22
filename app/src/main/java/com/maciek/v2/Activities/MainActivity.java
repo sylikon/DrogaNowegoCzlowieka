@@ -35,7 +35,7 @@ import static com.maciek.v2.Activities.TrackListActivity.TYPE_ID;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, Response.Listener<byte[]>, Response.ErrorListener {
 
-    private Button touristButton, homeChurchButton, oazaYouthButton, advancedButton;
+    private Button touristButton, homeChurchButton, oazaYouthButton, advancedButton, backFromUpdateButton;
     private ProgressBar progressBar;
     private SQLiteDatabase db;
     private int progressStatus = 0;
@@ -101,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(mIntent);
                 break;
 
-
         }
     }
 
@@ -127,6 +126,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             homeChurchButton.setVisibility(View.VISIBLE);
             oazaYouthButton.setVisibility(View.VISIBLE);
             advancedButton.setVisibility(View.VISIBLE);
+
+
+            loader.setVisibility(View.VISIBLE);
+            TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
+            List<String> list = turistListDbQuery.getActiveAudio();
+            volleyGetRequest.getActiveAudioFromServerTable(list, findViewById(android.R.id.content), this);
+            loader.setVisibility(View.GONE);
+
         } else {
             reCreatedb();
             loader.setVisibility(View.VISIBLE);
@@ -135,11 +142,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             volleyGetRequest.getNameAndPosition(3, loader, this);
             volleyGetRequest.getNameAndPosition(4, loader, this);
         }
-        loader.setVisibility(View.VISIBLE);
-        TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
-        List<String> list = turistListDbQuery.getActiveAudio();
-        volleyGetRequest.getActiveAudioFromServerTable(list, loader, this);
-        loader.setVisibility(View.GONE);
         super.onResume();
 
     }
