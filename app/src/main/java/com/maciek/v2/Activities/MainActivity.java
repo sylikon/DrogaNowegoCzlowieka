@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
+import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +18,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button touristButton, homeChurchButton, oazaYouthButton, advancedButton, backFromUpdateButton;
     private ProgressBar progressBar;
     private SQLiteDatabase db;
+    private long lastClickTime = 0;
     private int progressStatus = 0;
     private Handler mHandler = new Handler();
     private Cursor cursor;
@@ -47,6 +51,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
+
+    public static String DATABASE_VERSION = "DATABASE_VERSION";
+    public static String LOCAL_DATABASE_VERSION = "LOCAL_DATABASE_VERSION";
+    public static String SHOULD_UPDATE_POSITION = "SHOULD_UPDATE_POSITION";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +72,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         touristButton.setOnClickListener(this);
         homeChurchButton.setOnClickListener(this);
         loader = findViewById(R.id.loader);
-        SharedPreferences sharedPreferences = this.getSharedPreferences(
-                getString(R.string.was_download_succesfull), this.MODE_PRIVATE);
+        VolleyGetRequest volleyGetRequest = new VolleyGetRequest(this, db);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(SHOULD_UPDATE_POSITION, false);
+        editor.apply();
+        if (prefs.getInt(LOCAL_DATABASE_VERSION, 0) < prefs.getInt(DATABASE_VERSION, 0)) {
+            TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
+            List<String> list = turistListDbQuery.getActiveAudio();
+            volleyGetRequest.getActiveAudioFromServerTable(list, findViewById(android.R.id.content), this);
+            editor.putBoolean(SHOULD_UPDATE_POSITION, true);
+            editor.apply();
+        }
+        volleyGetRequest.insertCurrentDbVersionToSharedPreferences(this, DATABASE_VERSION);
     }
 
 
@@ -78,6 +97,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         Intent mIntent = new Intent(this, MediaPlayerActivity.class);
         mIntent.putExtra(TRACK_PROGRESS, 0);
+        if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
+            Toast.makeText(this, "Za szybko klikasz :)", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        lastClickTime = SystemClock.elapsedRealtime();
 
         switch (view.getId()) {
             case R.id.button_tourist:
@@ -127,14 +152,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             oazaYouthButton.setVisibility(View.VISIBLE);
             advancedButton.setVisibility(View.VISIBLE);
 
-
-            loader.setVisibility(View.VISIBLE);
-            TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
-            List<String> list = turistListDbQuery.getActiveAudio();
-            volleyGetRequest.getActiveAudioFromServerTable(list, findViewById(android.R.id.content), this);
-            loader.setVisibility(View.GONE);
-
         } else {
+            volleyGetRequest.insertCurrentDbVersionToSharedPreferences(this, LOCAL_DATABASE_VERSION);
             reCreatedb();
             loader.setVisibility(View.VISIBLE);
             volleyGetRequest.getNameAndPosition(1, loader, this);

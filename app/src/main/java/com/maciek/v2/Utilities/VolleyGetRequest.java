@@ -2,12 +2,16 @@ package com.maciek.v2.Utilities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.preference.PreferenceManager;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.android.volley.Cache;
@@ -34,19 +38,19 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.maciek.v2.Activities.MainActivity.DATABASE_VERSION;
+import static com.maciek.v2.Activities.MainActivity.LOCAL_DATABASE_VERSION;
+
 /**
  * Created by Geezy on 16.07.2018.
  */
 
 public class VolleyGetRequest {
 
-    private ViewGroup container;
     private Context context;
     private SQLiteDatabase db;
     private RequestQueue mRequestQueue;
     private TuristListDbQuery turistListDbHelper;
-    private boolean isDone;
-    private RelativeLayout relativeLayout;
 
     public VolleyGetRequest(Context context, SQLiteDatabase db) {
         this.context = context;
@@ -59,7 +63,6 @@ public class VolleyGetRequest {
         Network network = new BasicNetwork(new HurlStack());
         mRequestQueue = new RequestQueue(cache, network);
         mRequestQueue.start();
-        isDone = false;
 
         String url = "http://android.x25.pl/NowaDroga/GET/getTitleAndPictureById.php?typeId=" + typeId;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -95,7 +98,7 @@ public class VolleyGetRequest {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                isDone = false;
+
             }
         });
         mRequestQueue.add(stringRequest);
@@ -104,7 +107,6 @@ public class VolleyGetRequest {
 
     private void getVideoAndAudio(final int typeId, final ContentLoadingProgressBar loader, final Context mContext) {
         String url = "http://android.x25.pl/NowaDroga/GET/getVideoByTitle.php?typeId=" + typeId;
-        isDone = false;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -143,8 +145,44 @@ public class VolleyGetRequest {
 
     }
 
+    public void insertCurrentDbVersionToSharedPreferences(final Context context, final String databasePref) {
+        Cache cache = new DiskBasedCache(context.getCacheDir(), 1024 * 1024);
+        Network network = new BasicNetwork(new HurlStack());
+        mRequestQueue = new RequestQueue(cache, network);
+        mRequestQueue.start();
+        String url = "http://android.x25.pl/NowaDroga/GET/getCurrentDbVersion.php";
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            JSONArray jsonArray = (JSONArray) jsonObject.get("punkty");
+                            List<String> audioList = new ArrayList<>();
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                audioList.add(jsonArray.getJSONObject(i).getString("value"));
+                            }
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putInt(databasePref, Integer.parseInt(audioList.get(0)));
+                            editor.apply();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        mRequestQueue.add(stringRequest);
+    }
+
 
     public void getActiveAudioFromServerTable(final List<String> currentAudioList, final View view, final Context mContext) {
+        insertCurrentDbVersionToSharedPreferences(mContext, LOCAL_DATABASE_VERSION);
         String url = "http://android.x25.pl/NowaDroga/GET/getActiveAudio.php";
         turistListDbHelper = new TuristListDbQuery(db);
         Cache cache = new DiskBasedCache(context.getCacheDir(), 1024 * 1024);
@@ -156,7 +194,6 @@ public class VolleyGetRequest {
                     @Override
                     public void onResponse(String response) {
                         try {
-                            addView(view, mContext);
                             JSONObject jsonObject = new JSONObject(response);
                             JSONArray jsonArray = (JSONArray) jsonObject.get("punkty");
                             List<String> audioList = new ArrayList<>();
@@ -177,9 +214,7 @@ public class VolleyGetRequest {
                                 }
                                 audioList.removeAll(turistListDbHelper.getActiveAudio());
                                 if (!audioList.isEmpty()) {
-                                    //TODO add view
-
-                                    getNameAndPositionByAudio(audioList, context);
+                                    addView(view, mContext, audioList);
                                 }
                             }
 
@@ -191,14 +226,14 @@ public class VolleyGetRequest {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                isDone = false;
+
             }
         });
         mRequestQueue.add(stringRequest);
     }
 
     private void getNameAndPositionByAudio(List<String> audioName, final Context mContext) {
-        isDone = false;
+
         final String audiosToDownload = prepareInClause(audioName);
         final String audiosToDownloadUri = audiosToDownload.replaceAll("'", "%27");
         String url = "http://android.x25.pl/NowaDroga/GET/getTitleAndPictureByAudio.php?audioName=" + audiosToDownload;
@@ -235,7 +270,7 @@ public class VolleyGetRequest {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                isDone = false;
+
             }
         });
         mRequestQueue.add(stringRequest);
@@ -253,7 +288,6 @@ public class VolleyGetRequest {
 
     private void getVideoAndAudioByAudio(String audio, final Context mContext) {
         String url = "http://android.x25.pl/NowaDroga/GET/getVideoByAudio.php?audioName=" + audio;
-        isDone = false;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -270,6 +304,8 @@ public class VolleyGetRequest {
                                 InsertPositionToList.insertVideo(db, video, audio);
 
                             }
+                            Intent intent = new Intent();
+                            intent.putExtra("startUpdate", true);
                             mContext.startActivity(new Intent(mContext, DownloaderActivity.class));
 
                         } catch (JSONException e) {
@@ -288,7 +324,6 @@ public class VolleyGetRequest {
     }
 
     public void updatePosition(final int typeId, final TuristListDbQuery turistListDbHelper) {
-        isDone = false;
         String url = "http://android.x25.pl/NowaDroga/GET/getTitleAndPictureById.php?typeId=" + typeId;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -314,34 +349,49 @@ public class VolleyGetRequest {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                isDone = false;
             }
         });
         mRequestQueue.add(stringRequest);
     }
 
 
-    public void addView(final View mainView, Context context) {
-        LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        assert vi != null;
+    public void addView(final View mainView, final Context context, final List<String> audioList) {
 
-        final View v = vi.inflate(R.layout.update_layout, null);
-        container = mainView.findViewById(R.id.main_activity_layout);
-        container.removeAllViews();
-        container.addView(v, 0, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        final Button touristButton = mainView.findViewById(R.id.button_tourist);
+        final Button homeChurchButton = mainView.findViewById(R.id.button_home_church);
+        final Button oazaYouthButton = mainView.findViewById(R.id.button_oaza_youth);
+        final Button advancedButton = mainView.findViewById(R.id.button_advanced);
+        Button rejectButton = mainView.findViewById(R.id.reject_update_button);
+        Button acceptButton = mainView.findViewById(R.id.accept_update_button);
 
-        Button rejectUpdate = v.findViewById(R.id.reject_update_button);
-        rejectUpdate.setOnClickListener(new View.OnClickListener() {
+        final LinearLayout updateLayout = mainView.findViewById(R.id.updateLinearLayout);
+
+        updateLayout.setVisibility(View.VISIBLE);
+
+        touristButton.setVisibility(View.GONE);
+        homeChurchButton.setVisibility(View.GONE);
+        oazaYouthButton.setVisibility(View.GONE);
+        advancedButton.setVisibility(View.GONE);
+
+        rejectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                removeView(mainView, v);
+                updateLayout.setVisibility(View.GONE);
+                touristButton.setVisibility(View.VISIBLE);
+                homeChurchButton.setVisibility(View.VISIBLE);
+                oazaYouthButton.setVisibility(View.VISIBLE);
+                advancedButton.setVisibility(View.VISIBLE);
             }
         });
 
-    }
+        acceptButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getNameAndPositionByAudio(audioList, context);
+            }
+        });
 
-    public void removeView(View view, View v) {
-        view.setVisibility(View.VISIBLE);
+
     }
 
 

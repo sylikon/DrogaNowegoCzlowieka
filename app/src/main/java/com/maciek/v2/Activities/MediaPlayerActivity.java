@@ -1,9 +1,11 @@
 package com.maciek.v2.Activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaPlayer;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +30,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static com.maciek.v2.Activities.MainActivity.SHOULD_UPDATE_POSITION;
 import static com.maciek.v2.Activities.TrackListActivity.TITLE;
 import static com.maciek.v2.Activities.TrackListActivity.TYPE_ID;
 
@@ -88,11 +91,12 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
 
             }
         }
-        mapTitle = updateMap(mapTitle, turistListDbQuery);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if (mapTitle.get(mapTitle.keySet().size()) == null) {
-            turistListDbQuery.updatePosition(mapTitle, typeId);
+        if (prefs.getBoolean(SHOULD_UPDATE_POSITION, false)) {
+            updateCurrentList();
         }
+
 
         cursor = turistListDbQuery.getAudioUriImageUriVideoUriPosByTypeId(typeId);
         int audioUriIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_AUDIO_URI);
@@ -204,6 +208,14 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         }
 
 
+    }
+
+    private void updateCurrentList() {
+        mapTitle = updateMap(mapTitle, turistListDbQuery);
+
+        if (mapTitle.get(mapTitle.keySet().size()) == null) {
+            turistListDbQuery.updatePosition(mapTitle, typeId);
+        }
     }
 
     private boolean initMediaPlayer() {
