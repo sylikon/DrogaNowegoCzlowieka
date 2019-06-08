@@ -63,7 +63,7 @@
                 android:id="@+id/reject_download_button"
                 android:layout_height="wrap_content"
                 android:background="@drawable/button"
-                android:text="wyjdź"
+                android:text="@string/exit_button"
                 android:layout_marginRight="10dp"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="1"
@@ -75,7 +75,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:background="@drawable/button"
-                android:text="Pobierz"
+                android:text="@string/download_button"
                 android:layout_weight="1"
                 android:visibility="visible"/>
             <Button

@@ -64,7 +64,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/button"
-                android:text="powrót"
+                android:text="@string/back_button"
                 android:visibility="visible" />
 
             <Button
@@ -75,7 +75,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/button"
-                android:text="aktualizuj"
+                android:text="@string/update_button"
                 android:visibility="visible" />
         </LinearLayout>
     </LinearLayout>

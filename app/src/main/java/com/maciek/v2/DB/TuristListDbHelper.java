@@ -17,6 +17,7 @@ import java.util.ArrayList;
 public class TuristListDbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 83;
     public static final String DATABASE_NAME = "TouristSet.db";
+    private static TuristListDbHelper mInstance = null;
 
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + TouristListContract.TouristListEntry.TABLE_NAME + " (" +
@@ -37,9 +38,19 @@ public class TuristListDbHelper extends SQLiteOpenHelper {
             "DROP TABLE IF EXISTS " + TouristListContract.TouristListEntry.TABLE_NAME;
 
 
+    public static TuristListDbHelper getInstance(Context ctx) {
+
+        // Use the application context, which will ensure that you
+        // don't accidentally leak an Activity's context.
+        // See this article for more information: http://bit.ly/6LRzfx
+        if (mInstance == null) {
+            mInstance = new TuristListDbHelper(ctx.getApplicationContext());
+        }
+        return mInstance;
+    }
 
 
-    public TuristListDbHelper(Context context){
+    private TuristListDbHelper(Context context) {
         super(context, DATABASE_NAME,null,DATABASE_VERSION);
 
     }

@@ -3,15 +3,11 @@ package com.maciek.v2.Activities;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
-import android.support.v4.widget.ContentLoadingProgressBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-
-import android.widget.ProgressBar;
-
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -44,7 +40,7 @@ public class TrackListActivity extends AppCompatActivity implements  TrackListAd
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
-        TuristListDbHelper turistListDbHelper = new TuristListDbHelper(this);
+        TuristListDbHelper turistListDbHelper = TuristListDbHelper.getInstance(this);
         SQLiteDatabase db = turistListDbHelper.getReadableDatabase();
         TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
         Intent intent = getIntent();

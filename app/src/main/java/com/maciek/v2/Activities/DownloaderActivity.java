@@ -7,6 +7,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -26,22 +28,20 @@ import com.maciek.v2.Utilities.DownloadService;
 
 public class DownloaderActivity extends AppCompatActivity implements Response.Listener<byte[]>, Response.ErrorListener, View.OnClickListener {
 
-    private int progressStatus;
     private ProgressBar progressBar;
     private SQLiteDatabase db;
     private Button acceptButton, rejectButton, goToMainButton;
     private TextView textView;
     private TuristListDbHelper turistListDbHelper;
-    private TuristListDbQuery turistListDbQuery;
     private SharedPreferences.Editor editor;
+    private TuristListDbQuery turistListDbQuery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_downloader);
-        turistListDbHelper = new TuristListDbHelper(this);
+        turistListDbHelper = TuristListDbHelper.getInstance(this);
         db = turistListDbHelper.getReadableDatabase();
-        turistListDbQuery = new TuristListDbQuery(db);
         textView = findViewById(R.id.downloader_textView);
         progressBar = findViewById(R.id.progress_bar_downloader);
         acceptButton = findViewById(R.id.accept_download_button);
@@ -53,22 +53,26 @@ public class DownloaderActivity extends AppCompatActivity implements Response.Li
         SharedPreferences sharedPref = this.getSharedPreferences(
                 getString(R.string.was_download_succesfull), Context.MODE_PRIVATE);
         editor = sharedPref.edit();
-
-
+        db = turistListDbHelper.getReadableDatabase();
+        turistListDbQuery = new TuristListDbQuery(db);
     }
 
 
     @Override
     protected void onResume() {
-        registerReceiver(receiver, new IntentFilter(
-                DownloadService.NOTIFICATION));
         super.onResume();
-        Intent intent = getIntent();
-        boolean shouldDownload = intent.getBooleanExtra("startUpdate", false);
+        boolean shouldDownload = true;
+        if (isNetworkAvailable()) {
+            Intent intent = getIntent();
+            shouldDownload = intent.getBooleanExtra("startUpdate", false);
+        } else {
+            textView.setText(getString(R.string.no_internet_connection_downloader));
+        }
+
         if (shouldDownload) {
+            registerReceiver(receiver, new IntentFilter(
+                    DownloadService.NOTIFICATION));
             downloadConent("1");
-            acceptButton.setVisibility(View.GONE);
-            rejectButton.setVisibility(View.GONE);
         }
     }
 
@@ -102,7 +106,7 @@ public class DownloaderActivity extends AppCompatActivity implements Response.Li
                         if (test <= 4)
                             downloadConent(test.toString());
                         else {
-                            textView.setText("Gitara sciągnałeś wszystko i się aplikacja nie wysypała, idź słuchaj");
+                            textView.setText(getString(R.string.succesfull_download_downloader));
                             goToMainButton.setVisibility(View.VISIBLE);
                             unregisterReceiver(receiver);
                             editor.putInt(getString(R.string.was_download_succesfull), 4);
@@ -110,35 +114,37 @@ public class DownloaderActivity extends AppCompatActivity implements Response.Li
                         }
                     }
 
-//                    Toast.makeText(TrackListActivity.this, "Musze przemyslec jak dac znac ze skonczylo sie pobierac, ", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Download failed",
-                            Toast.LENGTH_SHORT).show();
+                    unregisterReceiver(receiver);
+                    reCreateTable();
+                    editor.putInt(getString(R.string.was_download_succesfull), 0);
+                    editor.commit();
+                    textView.setText(getString(R.string.download_failed_downloader));
+                    progressBar.setVisibility(View.GONE);
+
                 }
             }
         }
     };
 
 
-    public void downloadConent(String typeId) {
+    private void downloadConent(String typeId) {
         Cursor cursor;
-        progressStatus = 0;
-        TuristListDbHelper turistListDbHelper = new TuristListDbHelper(this);
-        db = turistListDbHelper.getReadableDatabase();
-        TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
+        int progressStatus = 0;
+
         cursor = turistListDbQuery.getAudioCursor(typeId);
         switch (typeId) {
             case "1":
-                textView.setText("Teraz pobieram: Turysta");
+                textView.setText(getString(R.string.download_tourist_path));
                 break;
             case "2":
-                textView.setText("Teraz pobieram: Oaza");
+                textView.setText(getString(R.string.download_oaza_path));
                 break;
             case "3":
-                textView.setText("Teraz pobieram: Domowy cośtam");
+                textView.setText(getString(R.string.download_house_path));
                 break;
             case "4":
-                textView.setText("Teraz pobieram: Zaawansowyany");
+                textView.setText(getString(R.string.download_advanced_path));
                 break;
         }
 
@@ -217,37 +223,54 @@ public class DownloaderActivity extends AppCompatActivity implements Response.Li
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.accept_download_button:
+                if (!isNetworkAvailable()) {
+                    Toast.makeText(this, getString(R.string.toast_turn_internet_on_downloader), Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                registerReceiver(receiver, new IntentFilter(
+                        DownloadService.NOTIFICATION));
                 downloadConent("1");
                 acceptButton.setVisibility(View.GONE);
                 rejectButton.setVisibility(View.GONE);
+
                 break;
             case R.id.reject_download_button:
-                db = turistListDbHelper.getReadableDatabase();
-                db.execSQL("DROP TABLE IF EXISTS " + TouristListContract.TouristListEntry.TABLE_NAME);
-                db.execSQL("CREATE TABLE " + TouristListContract.TouristListEntry.TABLE_NAME + " (" +
-                        TouristListContract.TouristListEntry._ID + " INTEGER PRIMARY KEY," +
-                        TouristListContract.TouristListEntry.COLUMN_POSITION + " NUMBER," +
-                        TouristListContract.TouristListEntry.COLUMN_AUDIO + " TEXT," +
-                        TouristListContract.TouristListEntry.COLUMN_NAME + " TEXT," +
-                        TouristListContract.TouristListEntry.COLUMN_AUDIO_URI + " TEXT," +
-                        TouristListContract.TouristListEntry.COLUMN_PICTURE + " TEXT," +
-                        TouristListContract.TouristListEntry.COLUMN_PICTURE_URI + " TEXT," +
-                        TouristListContract.TouristListEntry.COLUMN_VIDEO + " TEXT," +
-                        TouristListContract.TouristListEntry.COLUMN_VIDEO_URI + " TEXT," +
-                        TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE + " BOOLEAN," +
-                        TouristListContract.TouristListEntry.COLUMN_CAN_TAKE_PHOTO + " BOOLEAN," +
-                        TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " NUMBER);");
+                reCreateTable();
                 finish();
                 moveTaskToBack(true);
-/*                System.exit(0);*/
                 break;
             case R.id.go_to_main_activity:
                 startActivity(new Intent(this, MainActivity.class));
         }
     }
 
+    private void reCreateTable() {
+        db.execSQL("DROP TABLE IF EXISTS " + TouristListContract.TouristListEntry.TABLE_NAME);
+        db.execSQL("CREATE TABLE " + TouristListContract.TouristListEntry.TABLE_NAME + " (" +
+                TouristListContract.TouristListEntry._ID + " INTEGER PRIMARY KEY," +
+                TouristListContract.TouristListEntry.COLUMN_POSITION + " NUMBER," +
+                TouristListContract.TouristListEntry.COLUMN_AUDIO + " TEXT," +
+                TouristListContract.TouristListEntry.COLUMN_NAME + " TEXT," +
+                TouristListContract.TouristListEntry.COLUMN_AUDIO_URI + " TEXT," +
+                TouristListContract.TouristListEntry.COLUMN_PICTURE + " TEXT," +
+                TouristListContract.TouristListEntry.COLUMN_PICTURE_URI + " TEXT," +
+                TouristListContract.TouristListEntry.COLUMN_VIDEO + " TEXT," +
+                TouristListContract.TouristListEntry.COLUMN_VIDEO_URI + " TEXT," +
+                TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE + " BOOLEAN," +
+                TouristListContract.TouristListEntry.COLUMN_CAN_TAKE_PHOTO + " BOOLEAN," +
+                TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " NUMBER);");
+    }
+
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     @Override
     public void onBackPressed() {
-        Toast.makeText(this, "jeszcze moment i zaraz się ściagnie", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.back_button_toast_on_downloader), Toast.LENGTH_SHORT).show();
     }
 }

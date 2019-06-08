@@ -8,16 +8,17 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Handler;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Response;
@@ -29,6 +30,7 @@ import com.maciek.v2.R;
 import com.maciek.v2.Utilities.VolleyGetRequest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.maciek.v2.Activities.MediaPlayerActivity.TRACK_PROGRESS;
@@ -38,19 +40,14 @@ import static com.maciek.v2.Activities.TrackListActivity.TYPE_ID;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, Response.Listener<byte[]>, Response.ErrorListener {
 
-    private Button touristButton, homeChurchButton, oazaYouthButton, advancedButton, backFromUpdateButton;
-    private ProgressBar progressBar;
+    private Button touristButton;
+    private Button homeChurchButton;
+    private Button oazaYouthButton;
+    private Button advancedButton;
+    private VolleyGetRequest volleyGetRequest;
     private SQLiteDatabase db;
     private long lastClickTime = 0;
-    private int progressStatus = 0;
-    private Handler mHandler = new Handler();
-    private Cursor cursor;
     private ContentLoadingProgressBar loader;
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
 
     public static String DATABASE_VERSION = "DATABASE_VERSION";
     public static String LOCAL_DATABASE_VERSION = "LOCAL_DATABASE_VERSION";
@@ -67,8 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        TuristListDbHelper turistListDbHelper = new TuristListDbHelper(this);
+        TuristListDbHelper turistListDbHelper = TuristListDbHelper.getInstance(this);
         db = turistListDbHelper.getWritableDatabase();
         touristButton = findViewById(R.id.button_tourist);
         homeChurchButton = findViewById(R.id.button_home_church);
@@ -79,21 +75,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         touristButton.setOnClickListener(this);
         homeChurchButton.setOnClickListener(this);
         loader = findViewById(R.id.loader);
-        VolleyGetRequest volleyGetRequest = new VolleyGetRequest(this, db);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.apply();
-        if (prefs.getInt(LOCAL_DATABASE_VERSION, 0) < prefs.getInt(DATABASE_VERSION, 0)) {
-            TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
-            List<String> list = turistListDbQuery.getActiveAudio();
-            volleyGetRequest.getActiveAudioFromServerTable(list, findViewById(android.R.id.content), this);
-            editor.putBoolean(SHOULD_UPDATE_POSITION_1, true);
-            editor.putBoolean(SHOULD_UPDATE_POSITION_2, true);
-            editor.putBoolean(SHOULD_UPDATE_POSITION_3, true);
-            editor.putBoolean(SHOULD_UPDATE_POSITION_4, true);
-            editor.apply();
+        volleyGetRequest = new VolleyGetRequest(this, db);
+        if (isNetworkAvailable()) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = prefs.edit();
+            if (prefs.getInt(LOCAL_DATABASE_VERSION, 0) < prefs.getInt(DATABASE_VERSION, 0)) {
+                TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
+                List<String> list = turistListDbQuery.getActiveAudio();
+                volleyGetRequest.getActiveAudioFromServerTable(list, findViewById(android.R.id.content), this);
+                editor.putBoolean(SHOULD_UPDATE_POSITION_1, true);
+                editor.putBoolean(SHOULD_UPDATE_POSITION_2, true);
+                editor.putBoolean(SHOULD_UPDATE_POSITION_3, true);
+                editor.putBoolean(SHOULD_UPDATE_POSITION_4, true);
+                editor.apply();
+            }
+            volleyGetRequest.insertCurrentDbVersionToSharedPreferences(this, DATABASE_VERSION);
+        } else {
+            TextView noInternetTextView = findViewById(R.id.text_view_no_internet);
+            Button downloadButton = findViewById(R.id.launch_downloader_button);
+            Button closeAppButton = findViewById(R.id.exit_app_button);
+            downloadButton.setOnClickListener(this);
+            closeAppButton.setOnClickListener(this);
+            noInternetTextView.setVisibility(View.VISIBLE);
+            downloadButton.setVisibility(View.VISIBLE);
+            closeAppButton.setVisibility(View.VISIBLE);
         }
-        volleyGetRequest.insertCurrentDbVersionToSharedPreferences(this, DATABASE_VERSION);
+
+
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    private void startDownloading() {
+        volleyGetRequest.insertCurrentDbVersionToSharedPreferences(this, LOCAL_DATABASE_VERSION);
+        reCreatedb();
+        loader.setVisibility(View.VISIBLE);
+        volleyGetRequest.getNameAndPosition(Arrays.asList(1, 2, 3, 4), loader, this);
     }
 
 
@@ -107,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent mIntent = new Intent(this, MediaPlayerActivity.class);
         mIntent.putExtra(TRACK_PROGRESS, 0);
         if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
-            Toast.makeText(this, "Za szybko klikasz :)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getText(R.string.click_on_button_too_fast), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -134,7 +156,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mIntent.putExtra("type_id", "2");
                 startActivity(mIntent);
                 break;
-
+            case R.id.launch_downloader_button:
+                if (isNetworkAvailable()) {
+                    startDownloading();
+                } else {
+                    Toast.makeText(this, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.exit_app_button:
+                finish();
+                moveTaskToBack(true);
+                break;
         }
     }
 
@@ -152,8 +184,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onResume() {
+        super.onResume();
         SharedPreferences sharedPreferences = this.getSharedPreferences(getString(R.string.was_download_succesfull), Context.MODE_PRIVATE);
-        VolleyGetRequest volleyGetRequest = new VolleyGetRequest(this, db);
         int isSuccesful = sharedPreferences.getInt(getString(R.string.was_download_succesfull), 0);
         if (isSuccesful == 4) {
             touristButton.setVisibility(View.VISIBLE);
@@ -169,49 +201,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             editor.putBoolean(SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_3, true);
             editor.putBoolean(SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_4, true);
             editor.apply();
-            volleyGetRequest.insertCurrentDbVersionToSharedPreferences(this, LOCAL_DATABASE_VERSION);
-            reCreatedb();
-            loader.setVisibility(View.VISIBLE);
-            volleyGetRequest.getNameAndPosition(1, loader, this);
-            volleyGetRequest.getNameAndPosition(2, loader, this);
-            volleyGetRequest.getNameAndPosition(3, loader, this);
-            volleyGetRequest.getNameAndPosition(4, loader, this);
-        }
-        super.onResume();
+            if (isNetworkAvailable()) {
+                startDownloading();
+            }
 
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-    }
-
-    public static void verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-        }
-    }
-
-
-    private static boolean tableIsEmpty(SQLiteDatabase db) {
-        String count = "SELECT count(*) FROM " + TouristListContract.TouristListEntry.TABLE_NAME;
-        Cursor mcursor = db.rawQuery(count, null);
-        mcursor.moveToFirst();
-        int icount = mcursor.getInt(0);
-        if (icount > 0) {
-            return false;
-        } else {
-            return true;
-        }
-
     }
 
     private void reCreatedb() {

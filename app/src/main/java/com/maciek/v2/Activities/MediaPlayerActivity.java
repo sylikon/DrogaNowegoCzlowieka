@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,7 +20,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.maciek.v2.Adapter.SlidingImageAdapter;
@@ -77,7 +74,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         typeId = intent.getStringExtra(TYPE_ID);
         trackProgress = intent.getIntExtra(TRACK_PROGRESS, -1);
 
-        TuristListDbHelper turistListDbHelper = new TuristListDbHelper(this);
+        TuristListDbHelper turistListDbHelper = TuristListDbHelper.getInstance(this);
         SQLiteDatabase db = turistListDbHelper.getReadableDatabase();
         turistListDbQuery = new TuristListDbQuery(db);
         Cursor cursor = turistListDbQuery.getAudioUriImageUriVideoUriPosByTypeId(typeId);
@@ -202,16 +199,16 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
 
         switch (typeId) {
             case "1":
-                trackTitleTextView.setText("Turysta");
+                trackTitleTextView.setText(getString(R.string.tourist_path));
                 break;
             case "2":
-                trackTitleTextView.setText("Oaza");
+                trackTitleTextView.setText(getString(R.string.oaza_path));
                 break;
             case "3":
-                trackTitleTextView.setText("Domowy kościół");
+                trackTitleTextView.setText(getString(R.string.home_church_path));
                 break;
             case "4":
-                trackTitleTextView.setText("Zaawansowani");
+                trackTitleTextView.setText(getString(R.string.advanced_path));
                 break;
         }
 
@@ -313,7 +310,6 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
     public boolean onTouch(View view, MotionEvent motionEvent) {
         return false;
     }
-
     int temp;
     boolean ispressed = false;
 
@@ -487,7 +483,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         mTextView.setText(index + ". " + mapTitle.get(index));
 
 
-        if (mapCamera.get(index).equals("1")) {
+        if (mapCamera.get(index) != null && mapCamera.get(index).equals("1")) {
             lunchCamera.setVisibility(View.VISIBLE);
         } else {
             lunchCamera.setVisibility(View.GONE);
@@ -518,7 +514,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         } else {
             mFloatingActionButton.setVisibility(View.GONE);
         }
-        if (mapCamera.get(index).equals("1")) {
+        if (mapCamera.get(index) != null && mapCamera.get(index).equals("1")) {
             lunchCamera.setVisibility(View.VISIBLE);
         } else {
             lunchCamera.setVisibility(View.GONE);
@@ -546,7 +542,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
             mFloatingActionButton.setVisibility(View.GONE);
         }
 
-        if (mapCamera.get(index).equals("1")) {
+        if (mapCamera.get(index) != null && mapCamera.get(index).equals("1")) {
             lunchCamera.setVisibility(View.VISIBLE);
         } else {
             lunchCamera.setVisibility(View.GONE);

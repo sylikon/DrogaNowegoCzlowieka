@@ -6,13 +6,9 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.ContentLoadingProgressBar;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -26,11 +22,9 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
 import com.maciek.v2.Activities.DownloaderActivity;
 import com.maciek.v2.DB.InsertPositionToList;
-import com.maciek.v2.DB.TuristListDbHelper;
 import com.maciek.v2.DB.TuristListDbQuery;
 import com.maciek.v2.R;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,7 +32,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.maciek.v2.Activities.MainActivity.DATABASE_VERSION;
 import static com.maciek.v2.Activities.MainActivity.LOCAL_DATABASE_VERSION;
 
 /**
@@ -51,53 +44,55 @@ public class VolleyGetRequest {
     private SQLiteDatabase db;
     private RequestQueue mRequestQueue;
     private TuristListDbQuery turistListDbHelper;
+    private Cache cache;
+    private Network network;
 
     public VolleyGetRequest(Context context, SQLiteDatabase db) {
         this.context = context;
         this.db = db;
+        this.cache = new DiskBasedCache(context.getCacheDir(), 1024 * 1024);
+        this.network = new BasicNetwork(new HurlStack());
+        this.mRequestQueue = new RequestQueue(cache, network);
     }
 
-    public void getNameAndPosition(final int typeId, final ContentLoadingProgressBar loader, final Context mContext) {
-
-        Cache cache = new DiskBasedCache(context.getCacheDir(), 1024 * 1024);
-        Network network = new BasicNetwork(new HurlStack());
-        mRequestQueue = new RequestQueue(cache, network);
+    public void getNameAndPosition(final List<Integer> typeIds, final ContentLoadingProgressBar loader, final Context mContext) {
         mRequestQueue.start();
+        for (final int typeId : typeIds) {
+            String url = "http://android.x25.pl/NowaDroga/GET/getTitleAndPictureById.php?typeId=" + typeId;
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response);
+                                JSONArray jsonArray = (JSONArray) jsonObject.get("punkty");
 
-        String url = "http://android.x25.pl/NowaDroga/GET/getTitleAndPictureById.php?typeId=" + typeId;
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            JSONArray jsonArray = (JSONArray) jsonObject.get("punkty");
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    String audio = jsonArray.getJSONObject(i).getString("audio");
+                                    int position = jsonArray.getJSONObject(i).getInt("position");
+                                    String name = jsonArray.getJSONObject(i).getString("nazwa");
+                                    String jpgname = jsonArray.getJSONObject(i).getString("foto");
+                                    String isActiveString = jsonArray.getJSONObject(i).getString("aktywny");
+                                    String canTakePhoto = jsonArray.getJSONObject(i).getString("zrobfoto");
+                                    boolean isActive = isActiveString.equals("1");
+                                    boolean canTake = canTakePhoto.equals("1");
+                                    InsertPositionToList.insertAudiJpgDataByPos(db, audio, typeId, position, name, jpgname, isActive, canTake);
 
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                String audio = jsonArray.getJSONObject(i).getString("audio");
-                                int position = jsonArray.getJSONObject(i).getInt("position");
-                                String name = jsonArray.getJSONObject(i).getString("nazwa");
-                                String jpgname = jsonArray.getJSONObject(i).getString("foto");
-                                String isActiveString = jsonArray.getJSONObject(i).getString("aktywny");
-                                String canTakePhoto = jsonArray.getJSONObject(i).getString("zrobfoto");
-                                boolean isActive = isActiveString.equals("1");
-                                boolean canTake = canTakePhoto.equals("1");
-                                InsertPositionToList.insertAudiJpgDataByPos(db, audio, typeId, position, name, jpgname, isActive, canTake);
-
+                                }
+                                getVideoAndAudio(typeId, loader, mContext);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                            getVideoAndAudio(typeId, loader, mContext);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+
                         }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
 
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-        mRequestQueue.add(stringRequest);
+                }
+            });
+            mRequestQueue.add(stringRequest);
+        }
     }
 
 

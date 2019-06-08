@@ -14,7 +14,6 @@ import android.widget.ImageView;
 
 import com.maciek.v2.R;
 
-import java.net.URL;
 import java.util.ArrayList;
 
 /**
