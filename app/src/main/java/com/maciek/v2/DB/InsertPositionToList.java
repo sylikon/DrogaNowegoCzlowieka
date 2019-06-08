@@ -9,8 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
  */
 
 public class InsertPositionToList {
-    
-    public static void insertAudiJpgDataByPos(SQLiteDatabase db, String title, int type_id, int position, String name, String jpgName, boolean isActive) {
+
+    public static void insertAudiJpgDataByPos(SQLiteDatabase db, String title, int type_id, int position, String name, String jpgName, boolean isActive, boolean takePicture) {
         if (db == null) {
             return;
         }
@@ -22,6 +22,7 @@ public class InsertPositionToList {
         cv.put(TouristListContract.TouristListEntry.COLUMN_NAME, name);
         cv.put(TouristListContract.TouristListEntry.COLUMN_PICTURE, jpgName);
         cv.put(TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE, isActive);
+        cv.put(TouristListContract.TouristListEntry.COLUMN_CAN_TAKE_PHOTO, takePicture);
 
 
         //insert all guests in one transaction

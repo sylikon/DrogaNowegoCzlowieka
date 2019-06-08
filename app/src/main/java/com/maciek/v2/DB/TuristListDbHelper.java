@@ -30,6 +30,7 @@ public class TuristListDbHelper extends SQLiteOpenHelper {
                     TouristListContract.TouristListEntry.COLUMN_VIDEO + " TEXT," +
                     TouristListContract.TouristListEntry.COLUMN_VIDEO_URI + " TEXT," +
                     TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE + " BOOLEAN," +
+                    TouristListContract.TouristListEntry.COLUMN_CAN_TAKE_PHOTO + " BOOLEAN," +
                     TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " NUMBER);";
 
     private static final String SQL_DELETE_ENTRIES =

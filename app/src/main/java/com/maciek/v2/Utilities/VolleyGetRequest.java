@@ -79,14 +79,10 @@ public class VolleyGetRequest {
                                 String name = jsonArray.getJSONObject(i).getString("nazwa");
                                 String jpgname = jsonArray.getJSONObject(i).getString("foto");
                                 String isActiveString = jsonArray.getJSONObject(i).getString("aktywny");
-                                boolean isActive = true;
-                                if (isActiveString.equals("1")) {
-                                    isActive = true;
-                                } else {
-                                    isActive = false;
-                                }
-
-                                InsertPositionToList.insertAudiJpgDataByPos(db, audio, typeId, position, name, jpgname, isActive);
+                                String canTakePhoto = jsonArray.getJSONObject(i).getString("zrobfoto");
+                                boolean isActive = isActiveString.equals("1");
+                                boolean canTake = canTakePhoto.equals("1");
+                                InsertPositionToList.insertAudiJpgDataByPos(db, audio, typeId, position, name, jpgname, isActive, canTake);
 
                             }
                             getVideoAndAudio(typeId, loader, mContext);
@@ -252,13 +248,10 @@ public class VolleyGetRequest {
                                 String name = jsonArray.getJSONObject(i).getString("nazwa");
                                 String jpgname = jsonArray.getJSONObject(i).getString("foto");
                                 String isActiveString = jsonArray.getJSONObject(i).getString("aktywny");
-                                boolean isActive;
-                                if (isActiveString.equals("1")) {
-                                    isActive = true;
-                                } else {
-                                    isActive = false;
-                                }
-                                InsertPositionToList.insertAudiJpgDataByPos(db, audio, typeId, position, name, jpgname, isActive);
+                                String canTakePhoto = jsonArray.getJSONObject(i).getString("zrobfoto");
+                                boolean isActive = isActiveString.equals("1");
+                                boolean canTake = canTakePhoto.equals("1");
+                                InsertPositionToList.insertAudiJpgDataByPos(db, audio, typeId, position, name, jpgname, isActive, canTake);
 
                             }
                             getVideoAndAudioByAudio(audiosToDownloadUri, mContext);

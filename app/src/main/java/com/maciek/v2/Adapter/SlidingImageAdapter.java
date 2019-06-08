@@ -1,10 +1,12 @@
 package com.maciek.v2.Adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +29,7 @@ public class SlidingImageAdapter extends PagerAdapter {
 
     public SlidingImageAdapter(Context context, ArrayList<String> IMAGES) {
         this.context = context;
-        this.IMAGES=IMAGES;
+        this.IMAGES = IMAGES;
         inflater = LayoutInflater.from(context);
     }
 
@@ -50,23 +52,25 @@ public class SlidingImageAdapter extends PagerAdapter {
                 .findViewById(R.id.image);
 
         String stringUrl = IMAGES.get(position);
-        if(IMAGES.get(position).contains("null")){
-            stringUrl="/data/user/0/com.maciek.droganowegoczlowieka/files/turysta-dialog-malzenski.jpg";
-        }
-        URL url = null;
-        Bitmap bitmap = null;
-        try {
-            url = new URL("file://"+stringUrl);
-            bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        imageView.setImageBitmap(bitmap);
-
+        if (stringUrl.contains("JPEG_")) {
+            setPic(imageView, stringUrl, view);
+        } else {
+            Bitmap bitmap = null;
+            try {
+                bitmap = BitmapFactory.decodeFile(stringUrl);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            imageView.setImageBitmap(bitmap);
+        }
         view.addView(imageLayout, 0);
 
         return imageLayout;
+    }
+
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
     }
 
     @Override
@@ -82,4 +86,32 @@ public class SlidingImageAdapter extends PagerAdapter {
     public Parcelable saveState() {
         return null;
     }
+
+
+    private void setPic(ImageView imageView, String currentPhotoPath, View view) {
+        // Get the dimensions of the View
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int targetH = displayMetrics.heightPixels;
+        int targetW = displayMetrics.widthPixels;
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+        imageView.setImageBitmap(bitmap);
+    }
+
 }

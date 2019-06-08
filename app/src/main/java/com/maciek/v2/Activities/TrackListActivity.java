@@ -28,19 +28,11 @@ import static com.maciek.v2.Activities.MediaPlayerActivity.POSITION;
 
 public class TrackListActivity extends AppCompatActivity implements  TrackListAdapter.ListItemClickListener,  Response.Listener<byte[]>, Response.ErrorListener{
 
-    private SQLiteDatabase db;
     HashMap<String,String> temp;
-    private TrackListAdapter trackListAdapter;
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mLayoutManager;
     public static String TYPE_ID = "type_id";
     public static String TITLE = "title";
     String typeId;
-    private ContentLoadingProgressBar loader;
-    private int progressStatus;
-    private int cursorMax;
     String title;
-    private ProgressBar progressBar;    int i=0;
     int position;
 
 
@@ -48,27 +40,24 @@ public class TrackListActivity extends AppCompatActivity implements  TrackListAd
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track_list);
-        mRecyclerView = findViewById(R.id.my_recycler_view);
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView mRecyclerView = findViewById(R.id.my_recycler_view);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
         TuristListDbHelper turistListDbHelper = new TuristListDbHelper(this);
-        db = turistListDbHelper.getReadableDatabase();
+        SQLiteDatabase db = turistListDbHelper.getReadableDatabase();
         TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
         Intent intent = getIntent();
         typeId = intent.getStringExtra(TYPE_ID);
         title = intent.getStringExtra(TITLE);
         position = intent.getIntExtra(POSITION, -1);
         Cursor cursor = turistListDbQuery.getQueriedTouristList(typeId);
-        trackListAdapter = new TrackListAdapter(this,cursor,this);
+        TrackListAdapter trackListAdapter = new TrackListAdapter(this, cursor, this);
         mRecyclerView.setAdapter(trackListAdapter);
-        progressBar =findViewById(R.id.progress_bar);
 
         temp = new HashMap<>();
         cursor = turistListDbQuery.getAudioCursor(typeId);
-        cursorMax=cursor.getCount()*3;
         cursor.close();
-        loader = findViewById(R.id.loader_track_list);
 
 //        TODO: sprawdzić czy ktoś wyraził zgodę na używanie internetu// korzystanie z internal storage
 
@@ -118,7 +107,7 @@ public class TrackListActivity extends AppCompatActivity implements  TrackListAd
         intent.putExtra(POSITION, position);
         startActivity(intent);
         // Otherwise defer to system default behavior.
-        super.onBackPressed();
+
     }
 
     @Override

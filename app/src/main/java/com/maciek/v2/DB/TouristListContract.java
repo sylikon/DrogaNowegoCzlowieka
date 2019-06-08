@@ -21,6 +21,7 @@ public class TouristListContract {
         public static final String COLUMN_VIDEO = "VIDEO";
         public static final String COLUMN_VIDEO_URI = "VIDEO_URI";
         public static final String COLUMN_IS_ACTIVE = "IS_ACTIVE";
+        public static final String COLUMN_CAN_TAKE_PHOTO = "CAN_TAKE_PHOTO";
 
 
     }

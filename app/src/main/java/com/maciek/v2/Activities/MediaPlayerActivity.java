@@ -4,13 +4,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -24,13 +31,14 @@ import com.maciek.v2.DB.TuristListDbHelper;
 import com.maciek.v2.DB.TuristListDbQuery;
 import com.maciek.v2.R;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.maciek.v2.Activities.MainActivity.SHOULD_UPDATE_POSITION;
 import static com.maciek.v2.Activities.TrackListActivity.TITLE;
 import static com.maciek.v2.Activities.TrackListActivity.TYPE_ID;
 
@@ -38,25 +46,23 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
         MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener {
 
-    private SQLiteDatabase db;
     private TuristListDbQuery turistListDbQuery;
-    private TuristListDbHelper turistListDbHelper;
-    private FloatingActionButton mFloatingActionButton;
-    private TextView mTextView, trackTitleTextView;
-    private Cursor cursor;
+    private FloatingActionButton mFloatingActionButton, lunchCamera;
+    private TextView mTextView;
     ArrayList<String> listOfImagesSorted;
-    private static ViewPager viewPager;
+    private ViewPager viewPager;
     public static String POSITION = "POSITION";
+    static final int REQUEST_TAKE_PHOTO = 101;
 
-    private ImageButton previous, next, start;
-    private Button showList, goToMainMenu;
-    private ImageView imageView;
+    private ImageButton start;
     int index = -1;
     String title;
     private String typeId;
-    private Map<Integer, String> mapAudio, mapVideo, mapImage, mapTitle;
+    private Map<Integer, String> mapTitle;
+    private SparseArray<String> mapAudio, mapVideo, mapImage, mapCamera;
 
     private MediaPlayer mMediaPlayer;
+    private SlidingImageAdapter slidingImageAdapter;
     public static String TRACK_PROGRESS = "TRACK_PROGRESS";
     int trackProgress;
 
@@ -71,17 +77,18 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         typeId = intent.getStringExtra(TYPE_ID);
         trackProgress = intent.getIntExtra(TRACK_PROGRESS, -1);
 
-        turistListDbHelper = new TuristListDbHelper(this);
-        db = turistListDbHelper.getReadableDatabase();
+        TuristListDbHelper turistListDbHelper = new TuristListDbHelper(this);
+        SQLiteDatabase db = turistListDbHelper.getReadableDatabase();
         turistListDbQuery = new TuristListDbQuery(db);
-        cursor = turistListDbQuery.getAudioUriImageUriVideoUriPosByTypeId(typeId);
+        Cursor cursor = turistListDbQuery.getAudioUriImageUriVideoUriPosByTypeId(typeId);
 
         int audioNameIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_NAME);
         int posIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_POSITION);
 
-        mapAudio = new HashMap<>();
-        mapImage = new HashMap<>();
-        mapVideo = new HashMap<>();
+        mapAudio = new SparseArray<>();
+        mapImage = new SparseArray<>();
+        mapVideo = new SparseArray<>();
+        mapCamera = new SparseArray<>();
         mapTitle = new LinkedHashMap<>();
         listOfImagesSorted = new ArrayList<>();
 
@@ -91,17 +98,14 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
 
             }
         }
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if (prefs.getBoolean(SHOULD_UPDATE_POSITION, false)) {
-            updateCurrentList();
-        }
-
+        verifyUpdate(typeId);
 
         cursor = turistListDbQuery.getAudioUriImageUriVideoUriPosByTypeId(typeId);
         int audioUriIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_AUDIO_URI);
         int videoUriIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_VIDEO_URI);
         int imgUriIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_PICTURE_URI);
+        int canTakPhotoIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_CAN_TAKE_PHOTO);
         posIndex = cursor.getColumnIndex(TouristListContract.TouristListEntry.COLUMN_POSITION);
 
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -119,29 +123,33 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
                 mapImage.put(cursor.getInt(posIndex), cursor.getString(imgUriIndex));
                 listOfImagesSorted.add(cursor.getString(imgUriIndex));
             }
+            if (cursor.getString(canTakPhotoIndex) != null || !cursor.getString(canTakPhotoIndex).equals("null")) {
+                mapCamera.put(cursor.getInt(posIndex), cursor.getString(canTakPhotoIndex));
+            }
         }
 
 
         //guziczki
-        previous = findViewById(R.id.button_previous);
-        next = findViewById(R.id.next_button);
+        ImageButton previous = findViewById(R.id.button_previous);
+        ImageButton next = findViewById(R.id.next_button);
         start = findViewById(R.id.start_stop_button);
         mTextView = findViewById(R.id.text_view_current_song);
         mFloatingActionButton = findViewById(R.id.launch_media_player);
-        trackTitleTextView = findViewById(R.id.track_name_text_view);
-        goToMainMenu = findViewById(R.id.GoToMainMenuButton);
+        lunchCamera = findViewById(R.id.launch_aparat);
+        TextView trackTitleTextView = findViewById(R.id.track_name_text_view);
+        Button goToMainMenu = findViewById(R.id.GoToMainMenuButton);
         goToMainMenu.setOnClickListener(this);
         previous.setOnClickListener(this);
         next.setOnClickListener(this);
         start.setOnClickListener(this);
         mFloatingActionButton.setOnClickListener(this);
-        imageView = findViewById(R.id.image_view_media_player);
-        showList = findViewById(R.id.showList);
+        lunchCamera.setOnClickListener(this);
+        Button showList = findViewById(R.id.showList);
         viewPager = findViewById(R.id.pager);
         showList.setOnClickListener(this);
         // koniec Guziczków
-
-        viewPager.setAdapter(new SlidingImageAdapter(MediaPlayerActivity.this, listOfImagesSorted));
+        slidingImageAdapter = new SlidingImageAdapter(MediaPlayerActivity.this, listOfImagesSorted);
+        viewPager.setAdapter(slidingImageAdapter);
         start.setBackgroundColor(getResources().getColor(R.color.ziolny_ciemny_michala));
 
         initMediaPlayer();
@@ -210,7 +218,18 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
 
     }
 
-    private void updateCurrentList() {
+    private void verifyUpdate(String typeId) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getBoolean("SHOULD_UPDATE_POSITION_" + typeId, false) || prefs.getBoolean("SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_" + typeId, false)) {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("SHOULD_UPDATE_POSITION_" + typeId, false);
+            editor.putBoolean("SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_" + typeId, false);
+            editor.apply();
+            updateCurrentList();
+        }
+    }
+
+    public void updateCurrentList() {
         mapTitle = updateMap(mapTitle, turistListDbQuery);
 
         if (mapTitle.get(mapTitle.keySet().size()) == null) {
@@ -245,6 +264,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     protected void onResume() {
+        super.onResume();
         Intent intent = getIntent();
         if (intent.getIntExtra(POSITION, -1) != -1) {
             index = intent.getIntExtra(POSITION, -1);
@@ -255,14 +275,13 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
             }
             resumePlaying();
             viewPager.setCurrentItem(temp);
+            intent.removeExtra(POSITION);
 
         } else if (trackProgress != -1) {
             int position = intent.getIntExtra(TRACK_PROGRESS, 0);
             mMediaPlayer.seekTo(position);
             mMediaPlayer.start();
         }
-
-        super.onResume();
 
     }
 
@@ -275,8 +294,8 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     protected void onPause() {
-        pauseMedia();
         super.onPause();
+        pauseMedia();
     }
 
 
@@ -376,8 +395,68 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
                 intent.putExtra(POSITION, index);
                 intent.putExtra(TRACK_PROGRESS, mMediaPlayer.getCurrentPosition());
                 startActivity(intent);
-
+                break;
+            case R.id.launch_aparat:
+                ispressed = true;
+                start.setImageResource(R.drawable.ic_play_white);
+                start.setBackgroundColor(getResources().getColor(R.color.zielony_michala));
+                dispatchTakePictureIntent();
         }
+    }
+
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 101 && resultCode == RESULT_OK) {
+            String audioName = mapAudio.get(index);
+            audioName = audioName.substring(audioName.lastIndexOf("/") + 1, audioName.length());
+            turistListDbQuery.insertTakenPicture(currentPhotoPath, audioName);
+            mapImage.put(index, currentPhotoPath);
+            listOfImagesSorted.remove(index);
+            listOfImagesSorted.add(index, currentPhotoPath);
+            slidingImageAdapter.notifyDataSetChanged();
+            slidingImageAdapter.getItemPosition(1);
+        }
+    }
+
+    String currentPhotoPath;
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
     @Override
@@ -407,7 +486,14 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         mMediaPlayer.start();
         mTextView.setText(index + ". " + mapTitle.get(index));
 
-        if (mapVideo.containsKey(index)) {
+
+        if (mapCamera.get(index).equals("1")) {
+            lunchCamera.setVisibility(View.VISIBLE);
+        } else {
+            lunchCamera.setVisibility(View.GONE);
+        }
+
+        if (mapVideo.get(index) != null) {
             mFloatingActionButton.setVisibility(View.VISIBLE);
         } else {
             mFloatingActionButton.setVisibility(View.GONE);
@@ -427,11 +513,18 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         mMediaPlayer.start();
         mTextView.setText(index + ". " + mapTitle.get(index));
 
-        if (mapVideo.containsKey(index)) {
+        if (mapVideo.get(index) != null) {
             mFloatingActionButton.setVisibility(View.VISIBLE);
         } else {
             mFloatingActionButton.setVisibility(View.GONE);
         }
+        if (mapCamera.get(index).equals("1")) {
+            lunchCamera.setVisibility(View.VISIBLE);
+        } else {
+            lunchCamera.setVisibility(View.GONE);
+        }
+
+
     }
 
     private void skipPrevious() throws IOException {
@@ -447,11 +540,18 @@ public class MediaPlayerActivity extends AppCompatActivity implements View.OnCli
         mMediaPlayer.start();
         mTextView.setText(index + ". " + mapTitle.get(index));
 
-        if (mapVideo.containsKey(index)) {
+        if (mapVideo.get(index) != null) {
             mFloatingActionButton.setVisibility(View.VISIBLE);
         } else {
             mFloatingActionButton.setVisibility(View.GONE);
         }
+
+        if (mapCamera.get(index).equals("1")) {
+            lunchCamera.setVisibility(View.VISIBLE);
+        } else {
+            lunchCamera.setVisibility(View.GONE);
+        }
+
     }
 
 

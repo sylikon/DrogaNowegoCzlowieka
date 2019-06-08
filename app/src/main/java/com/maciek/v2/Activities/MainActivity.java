@@ -54,7 +54,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static String DATABASE_VERSION = "DATABASE_VERSION";
     public static String LOCAL_DATABASE_VERSION = "LOCAL_DATABASE_VERSION";
-    public static String SHOULD_UPDATE_POSITION = "SHOULD_UPDATE_POSITION";
+    public static String SHOULD_UPDATE_POSITION_1 = "SHOULD_UPDATE_POSITION_1";
+    public static String SHOULD_UPDATE_POSITION_2 = "SHOULD_UPDATE_POSITION_2";
+    public static String SHOULD_UPDATE_POSITION_3 = "SHOULD_UPDATE_POSITION_3";
+    public static String SHOULD_UPDATE_POSITION_4 = "SHOULD_UPDATE_POSITION_4";
+    public static String SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_1 = "SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_1";
+    public static String SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_2 = "SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_2";
+    public static String SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_3 = "SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_3";
+    public static String SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_4 = "SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_4";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,13 +82,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         VolleyGetRequest volleyGetRequest = new VolleyGetRequest(this, db);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(SHOULD_UPDATE_POSITION, false);
         editor.apply();
         if (prefs.getInt(LOCAL_DATABASE_VERSION, 0) < prefs.getInt(DATABASE_VERSION, 0)) {
             TuristListDbQuery turistListDbQuery = new TuristListDbQuery(db);
             List<String> list = turistListDbQuery.getActiveAudio();
             volleyGetRequest.getActiveAudioFromServerTable(list, findViewById(android.R.id.content), this);
-            editor.putBoolean(SHOULD_UPDATE_POSITION, true);
+            editor.putBoolean(SHOULD_UPDATE_POSITION_1, true);
+            editor.putBoolean(SHOULD_UPDATE_POSITION_2, true);
+            editor.putBoolean(SHOULD_UPDATE_POSITION_3, true);
+            editor.putBoolean(SHOULD_UPDATE_POSITION_4, true);
             editor.apply();
         }
         volleyGetRequest.insertCurrentDbVersionToSharedPreferences(this, DATABASE_VERSION);
@@ -153,6 +162,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             advancedButton.setVisibility(View.VISIBLE);
 
         } else {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_1, true);
+            editor.putBoolean(SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_2, true);
+            editor.putBoolean(SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_3, true);
+            editor.putBoolean(SHOULD_UPDATE_AFTER_FIRST_DOWNLOAD_4, true);
+            editor.apply();
             volleyGetRequest.insertCurrentDbVersionToSharedPreferences(this, LOCAL_DATABASE_VERSION);
             reCreatedb();
             loader.setVisibility(View.VISIBLE);
@@ -211,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 TouristListContract.TouristListEntry.COLUMN_VIDEO + " TEXT," +
                 TouristListContract.TouristListEntry.COLUMN_VIDEO_URI + " TEXT," +
                 TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE + " BOOLEAN," +
+                TouristListContract.TouristListEntry.COLUMN_CAN_TAKE_PHOTO + " BOOLEAN," +
                 TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " NUMBER);");
         finish();
     }

@@ -147,7 +147,7 @@ public class DownloaderActivity extends AppCompatActivity implements Response.Li
         if (cursor.moveToFirst()) {
             do {
                 String data = cursor.getString(cursor.getColumnIndex("AUDIO"));
-                String mUrl = "http://android.x25.pl/NowaDroga/audio/" + data;
+                String mUrl = "http://185.243.55.31/audio/" + data;
                 Intent intent = new Intent(this, DownloadService.class);
                 // add infos for the service which file to download and where to store
                 intent.putExtra(DownloadService.FILENAME, data);
@@ -165,7 +165,7 @@ public class DownloaderActivity extends AppCompatActivity implements Response.Li
             do {
 
                 String data = cursor.getString(cursor.getColumnIndex("PICTURE"));
-                String mUrl = "http://android.x25.pl/NowaDroga/foto/" + data;
+                String mUrl = "http://185.243.55.31/foto/" + data;
                 Intent intent = new Intent(this, DownloadService.class);
                 // add infos for the service which file to download and where to store
                 intent.putExtra(DownloadService.FILENAME, data);
@@ -185,7 +185,7 @@ public class DownloaderActivity extends AppCompatActivity implements Response.Li
                 if (data == null) {
                     data = "null";
                 }
-                String mUrl = "http://android.x25.pl/NowaDroga/video/" + data;
+                String mUrl = "http://185.243.55.31/video/" + data;
                 Intent intent = new Intent(this, DownloadService.class);
                 // add infos for the service which file to download and where to store
                 intent.putExtra(DownloadService.FILENAME, data);
@@ -235,6 +235,7 @@ public class DownloaderActivity extends AppCompatActivity implements Response.Li
                         TouristListContract.TouristListEntry.COLUMN_VIDEO + " TEXT," +
                         TouristListContract.TouristListEntry.COLUMN_VIDEO_URI + " TEXT," +
                         TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE + " BOOLEAN," +
+                        TouristListContract.TouristListEntry.COLUMN_CAN_TAKE_PHOTO + " BOOLEAN," +
                         TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " NUMBER);");
                 finish();
                 moveTaskToBack(true);

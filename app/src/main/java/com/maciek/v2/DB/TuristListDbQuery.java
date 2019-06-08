@@ -74,6 +74,18 @@ public class TuristListDbQuery {
 
     }
 
+    public void insertTakenPicture(String uri, String audio) {
+        String sql = String.format("update %1$s set %2$s = '%3$s' where %4$s = '%5$s'",
+                TouristListContract.TouristListEntry.TABLE_NAME,            //1
+                TouristListContract.TouristListEntry.COLUMN_PICTURE_URI,    //2
+                uri,                                                        //3
+                TouristListContract.TouristListEntry.COLUMN_AUDIO,          //4
+                audio                                                       //5
+
+        );
+        mDb.execSQL(sql);
+    }
+
     public void disableAudio(List<String> audioList) {
         String audioJoined = VolleyGetRequest.prepareInClause(audioList);
         String sql = String.format("update %1$s set %2$s = %3$s where %4$s in (%5$s)",
@@ -251,6 +263,7 @@ public class TuristListDbQuery {
                         TouristListContract.TouristListEntry.COLUMN_PICTURE_URI,
                         TouristListContract.TouristListEntry.COLUMN_VIDEO_URI,
                         TouristListContract.TouristListEntry.COLUMN_POSITION,
+                        TouristListContract.TouristListEntry.COLUMN_CAN_TAKE_PHOTO,
                         TouristListContract.TouristListEntry.COLUMN_NAME};
         String selection = TouristListContract.TouristListEntry.COLUMN_TYPE_ID + " = ? and " + TouristListContract.TouristListEntry.COLUMN_IS_ACTIVE + " = ? ";
         String[] selectionArgs = {typeId, "1"};
