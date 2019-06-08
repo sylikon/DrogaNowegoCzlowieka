@@ -12,32 +12,32 @@
     <string name="download_content_button">Pobierz audio/video</string>
     <string name="title_activity_downloader">DownloaderActivity</string>
     <string name="download_text">
-        Witaj! \n\nZanim będziesz mógł korzystać z aplikacju pobierz materiały multimedialne do wszystkich ścieżek.
-        Potrwa to w zależnosci od predkości Twojego internetu od kilku do kilkunastu minut. Zajmą one na Twoim telefonie około 120 Mb.  \nKliknij przycisk POBIERZ.
+        Witaj! \n\nZanim będziesz mógł korzystać z aplikacju pobierz materiały multimedialne do wszystkich ścieżek.\n
+        Potrwa to w zależnosci od predkości Twojego internetu od kilku do kilkunastu minut. Zajmą one na Twoim telefonie około 140 Mb.  \n\nKliknij przycisk POBIERZ.
     </string>
     <string name="update_text">
-        Dostępna jest aktualizacja ścieżek! Jeżeli chcesz cieszyć się nowymi punktami, kliknij aktualizuj :)
-        Jeżeli chcesz wrócić do aplikacji kliknij powrót.
+        Dostępna jest aktualizacja ścieżek! Aby pobrać nowe dane, kliknij AKTUALIZUJ
+        Jeżeli chcesz wrócić do aplikacji kliknij POWRÓT.
     </string>
-    <string name="hello_text">Hejo!</string>
+    <string name="hello_text">Witaj!</string>
     <string name="click_on_button_too_fast">Za szybko klikasz :)</string>
-    <string name="no_internet_connection">Brak dostepu do internetu : (</string>
-    <string name="no_internet_connection_downloader">Siemasz ni mosz internetu włącz internet i klinik pobiersz</string>
+    <string name="no_internet_connection">Brak dostepu do internetu :-(</string>
+    <string name="no_internet_connection_downloader">Brak połączenia do internetu - włącz go i klinik POBIERZ</string>
     <string name="download_button">Pobierz</string>
     <string name="exit_button">Wyjdź</string>
     <string name="update_button">Aktualizuj</string>
     <string name="currently_listening">Teraz słuchasz:</string>
     <string name="back_button">Powrót</string>
-    <string name="no_internet_main_view_text">Niestety nie masz dostępu do intertu, nie mozesz korzystac z appki eluwa</string>
+    <string name="no_internet_main_view_text">Niestety nie masz dostępu do intertu! Aby korzystać z aplikacji musisz go wlączyć!</string>
     <string name="was_download_succesfull">randomStringThatWontAppear</string>
-    <string name="succesfull_download_downloader">Gitara sciągnałeś wszystko i się aplikacja nie wysypała, idź słuchaj</string>
-    <string name="download_tourist_path">Teraz pobieram: Turysta</string>
-    <string name="download_oaza_path">Teraz pobieram: Oaza</string>
-    <string name="download_house_path">Teraz pobieram: Domowy cośtam</string>
-    <string name="download_advanced_path">Teraz pobieram: Zaawansowyany</string>
-    <string name="download_failed_downloader">cos sie zepsulo i nie bylo mnie slychac</string>
-    <string name="toast_turn_internet_on_downloader">Włącz internet plix</string>
-    <string name="back_button_toast_on_downloader">jeszcze moment i zaraz się ściagnie</string>
+    <string name="succesfull_download_downloader">Wszystkie materiały zostały pobrane prawidłowo.</string>
+    <string name="download_tourist_path">Pobieram ścieżkę: TURYSTA</string>
+    <string name="download_oaza_path">Pobieram ścieżkę: MŁODZIEŻ Z OAZY</string>
+    <string name="download_house_path">Pobieram ścieżkę: DOMOWY KOŚCIÓŁ</string>
+    <string name="download_advanced_path">Pobieram ścieżkę: ZAAWANSOWANI</string>
+    <string name="download_failed_downloader">BŁĄD!</string>
+    <string name="toast_turn_internet_on_downloader">Włącz internet!</string>
+    <string name="back_button_toast_on_downloader">Pobieranie, proszę czekać...</string>
     <string name="msg_token_fmt">123124</string>
     <string name="default_notification_channel_id">defaultNotificationChannelId</string>
     <!--TODO dodać wartości dla wszytkich referencji-->

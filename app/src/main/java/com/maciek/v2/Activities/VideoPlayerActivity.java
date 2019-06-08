@@ -60,6 +60,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements View.OnCli
         }
         videoView.setMediaController(new MediaController(this));
         videoView.requestFocus();
+        videoView.start();
         typeId = intent.getStringExtra(TYPE_ID);
         title = intent.getStringExtra(TITLE);
         videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -109,9 +110,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements View.OnCli
         super.onResume();
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            if (videoView != null && !videoView.isPlaying()) {
-                videoView.start();
-            }
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
