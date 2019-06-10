@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button homeChurchButton;
     private Button oazaYouthButton;
     private Button advancedButton;
+    private Button helpButton;
     private VolleyGetRequest volleyGetRequest;
     private SQLiteDatabase db;
     private long lastClickTime = 0;
@@ -70,10 +72,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         homeChurchButton = findViewById(R.id.button_home_church);
         oazaYouthButton = findViewById(R.id.button_oaza_youth);
         advancedButton = findViewById(R.id.button_advanced);
+        helpButton = findViewById(R.id.button_help);
         advancedButton.setOnClickListener(this);
         oazaYouthButton.setOnClickListener(this);
         touristButton.setOnClickListener(this);
         homeChurchButton.setOnClickListener(this);
+        helpButton.setOnClickListener(this);
         loader = findViewById(R.id.loader);
         volleyGetRequest = new VolleyGetRequest(this, db);
         if (isNetworkAvailable()) {
@@ -167,6 +171,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
                 moveTaskToBack(true);
                 break;
+            case R.id.button_help:
+                if (isNetworkAvailable()) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://dnc.x25.pl"));
+                    startActivity(browserIntent);
+                } else {
+                    Toast.makeText(this, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show();
+                }
+                break;
         }
     }
 
@@ -192,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             homeChurchButton.setVisibility(View.VISIBLE);
             oazaYouthButton.setVisibility(View.VISIBLE);
             advancedButton.setVisibility(View.VISIBLE);
+            helpButton.setVisibility(View.VISIBLE);
 
         } else {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

@@ -198,9 +198,9 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:textSize="14dp"
-            android:text="@string/debug_db_button"
-            android:id="@+id/button_db_debugger"
+            android:textSize="14sp"
+            android:text="@string/help_button"
+            android:id="@+id/button_help"
             android:layout_gravity="center_horizontal"
             android:background="@drawable/button"
             android:layout_marginLeft="20dp"

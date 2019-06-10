@@ -7,6 +7,7 @@
     <string name="tourist_button">Turysta</string>
     <string name="oaza_youth_button">Młodzież z Oazy</string>
     <string name="advanced_button">Zaawansowani</string>
+    <string name="help_button">Pomoc</string>
     <string name="home_church_button">Domowy Kościół</string>
     <string name="debug_db_button">DB_Debugger</string>
     <string name="download_content_button">Pobierz audio/video</string>
