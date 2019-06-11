@@ -1,20 +1,14 @@
 package com.maciek.v2.Activities;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -30,7 +24,6 @@ import com.maciek.v2.DB.TuristListDbQuery;
 import com.maciek.v2.R;
 import com.maciek.v2.Utilities.VolleyGetRequest;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -79,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         homeChurchButton.setOnClickListener(this);
         helpButton.setOnClickListener(this);
         loader = findViewById(R.id.loader);
+
         volleyGetRequest = new VolleyGetRequest(this, db);
         if (isNetworkAvailable()) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -173,8 +167,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.button_help:
                 if (isNetworkAvailable()) {
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://dnc.x25.pl"));
-                    startActivity(browserIntent);
+                    startActivity(new Intent(this, WebViewActivity.class));
                 } else {
                     Toast.makeText(this, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show();
                 }

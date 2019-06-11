@@ -20,33 +20,35 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity android:name=".Activities.WebViewActivity"></activity>
         <activity
-            android:name="com.maciek.v2.Activities.VideoPlayerActivity"
+            android:name=".Activities.VideoPlayerActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="com.maciek.v2.Activities.TrackListActivity"
+            android:name=".Activities.TrackListActivity"
             android:screenOrientation="portrait" />
 
-        <service android:name="com.maciek.v2.Utilities.DownloadService" />
+        <service android:name=".Utilities.DownloadService" />
 
         <activity
-            android:name="com.maciek.v2.Activities.MediaPlayerActivity"
+            android:name=".Activities.MediaPlayerActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.maciek.v2.Activities.MainActivity"
+            android:name=".Activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.maciek.v2.Activities.DownloaderActivity"
+            android:name=".Activities.DownloaderActivity"
             android:screenOrientation="portrait" />
 
-        <service android:name="com.maciek.v2.notification.MyFirebaseMessagingService">
+        <service android:name=".notification.MyFirebaseMessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
@@ -57,9 +59,8 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
-
     </application>
 
 </manifest>
